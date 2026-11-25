@@ -1,0 +1,52 @@
+// LissajousTiles — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/LissajousTiles.glsl
+// Author: Boundless <info@boundless-beta.com>
+// License: MIT
+// Description: The image breaks into a grid of tiles that swirl along Lissajous curves, in a Scanimate style, and flip one by one to the incoming image before settling back
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float speed; 
+
+uniform vec2 freq; 
+
+uniform float offset; 
+
+uniform float zoom; 
+
+uniform float fade; 
+
+const vec2 grid = vec2(10.,10.); 
+const float TAU = 6.283185307;
+
+vec4 transition (vec2 uv) {
+  
+  float p = 1.-pow(1.-smoothstep(0.,1.,1.-abs(1.-2.*progress)),3.); 
+  
+  for (float jBig = grid.y-1.; jBig >= 0.; jBig--) {
+    for (float iBig = grid.x-1.; iBig >= 0.; iBig--) {
+      float i = iBig/grid.x;
+      float j = jBig/grid.y;
+      float k = i/grid.y+j; 
+      vec2 uv0 = uv + vec2(i,j) - 0.5 + 0.5/grid + vec2(cos(k*TAU*freq.x+progress*6.*speed),sin(k*TAU*freq.y+progress*6.*(1.+offset)*speed))*zoom/2.;
+      uv0 = mix(uv, uv0, p);
+      if (uv0.x >= i && uv0.x < i+1./grid.x && uv0.y >= j && uv0.y < j+1./grid.y) { 
+        float tileMix = clamp(progress*((1.+fade)*2.*progress)-fade+k*fade, 0., 1.);
+        return mix(getFromColor(uv0), getToColor(uv0), tileMix);
+      }
+    }
+  }
+  return vec4(0.); 
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

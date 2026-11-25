@@ -1,0 +1,48 @@
+{
+  "id": "neon-flicker",
+  "name": "Neon Flicker",
+  "version": 1,
+  "description": "Editable animated text style: Neon Flicker.",
+  "tags": [
+    "neon",
+    "music",
+    "night"
+  ],
+  "sampleText": "AFTER HOURS",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Arial, sans-serif",
+    "fontSize": 92,
+    "fontWeight": 900,
+    "color": "#E9FFFF",
+    "accentColor": "#39E9FF",
+    "letterSpacing": 4,
+    "strokeColor": "#0A1220",
+    "strokeWidth": 3
+  },
+  "shape": {
+    "background": "#111827",
+    "padding": "18px 30px",
+    "borderRadius": 18
+  },
+  "animation": {
+    "type": "neon-flicker",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

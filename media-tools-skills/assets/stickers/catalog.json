@@ -1,0 +1,17 @@
+{
+  "pack": "reaction-labels-01",
+  "version": 1,
+  "format": "svg",
+  "alpha": true,
+  "purpose": "Short reusable editorial reaction stickers. Use sparingly and only when the spoken moment supports the label.",
+  "items": [
+    {"id":"wait-what","file":"svg/reaction-labels/wait-what.svg","tags":["surprise","question","reaction"]},
+    {"id":"plot-twist","file":"svg/reaction-labels/plot-twist.svg","tags":["reveal","unexpected","story"]},
+    {"id":"receipts","file":"svg/reaction-labels/receipts.svg","tags":["evidence","proof","fact-check"]},
+    {"id":"big-fact","file":"svg/reaction-labels/big-fact.svg","tags":["fact","emphasis","agreement"]},
+    {"id":"no-way","file":"svg/reaction-labels/no-way.svg","tags":["surprise","shock","reaction"]},
+    {"id":"hold-up","file":"svg/reaction-labels/hold-up.svg","tags":["pause","correction","clarification"]},
+    {"id":"level-up","file":"svg/reaction-labels/level-up.svg","tags":["achievement","growth","positive"]},
+    {"id":"oops","file":"svg/reaction-labels/oops.svg","tags":["mistake","humor","light"]}
+  ]
+}

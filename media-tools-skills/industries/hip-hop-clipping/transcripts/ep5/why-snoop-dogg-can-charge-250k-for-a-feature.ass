@@ -1,0 +1,49 @@
+﻿[Script Info]
+Title: Local timed speech captions
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Default,Arial,62,&H00FFFFFF,&H0046BEF7,&H002F2114,&H64000000,1,0,0,0,100,100,0,0,1,5,2,2,72,72,510,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.05,0:00:01.00,Default,,0,0,0,,{\fad(70,70)}Talk to me\Nabout the
+Dialogue: 0,0:00:01.00,0:00:02.20,Default,,0,0,0,,{\fad(70,70)}business of\Nfeatures.
+Dialogue: 0,0:00:02.20,0:00:03.73,Default,,0,0,0,,{\fad(70,70)}I heard {\c&H46BEF7&\b1}Snoop{\c&HFFFFFF&\b1}\Nsay he
+Dialogue: 0,0:00:03.73,0:00:06.73,Default,,0,0,0,,{\fad(70,70)}charges $250,000\Nto
+Dialogue: 0,0:00:06.73,0:00:09.78,Default,,0,0,0,,{\fad(70,70)}be featured\Nand another
+Dialogue: 0,0:00:09.78,0:00:12.13,Default,,0,0,0,,{\fad(70,70)}250 to be\Nin a
+Dialogue: 0,0:00:12.13,0:00:13.40,Default,,0,0,0,,{\fad(70,70)}video.
+Dialogue: 0,0:00:13.40,0:00:14.36,Default,,0,0,0,,{\fad(70,70)}What is the\Nbusiness of
+Dialogue: 0,0:00:14.36,0:00:14.96,Default,,0,0,0,,{\fad(70,70)}features?
+Dialogue: 0,0:00:14.96,0:00:16.10,Default,,0,0,0,,{\fad(70,70)}Yeah, I mean\Na lot
+Dialogue: 0,0:00:16.10,0:00:17.33,Default,,0,0,0,,{\fad(70,70)}of that comes\Nin the
+Dialogue: 0,0:00:17.33,0:00:19.19,Default,,0,0,0,,{\fad(70,70)}success that you\Nknow you've
+Dialogue: 0,0:00:19.19,0:00:21.03,Default,,0,0,0,,{\fad(70,70)}obtained as an\Nartist and
+Dialogue: 0,0:00:21.03,0:00:23.29,Default,,0,0,0,,{\fad(70,70)}like what the\Nvalue you
+Dialogue: 0,0:00:23.29,0:00:26.07,Default,,0,0,0,,{\fad(70,70)}have that you're\Nbringing to
+Dialogue: 0,0:00:26.07,0:00:29.20,Default,,0,0,0,,{\fad(70,70)}that artist and\Nthat record.
+Dialogue: 0,0:00:29.20,0:00:30.65,Default,,0,0,0,,{\fad(70,70)}And a lot\Nof times
+Dialogue: 0,0:00:30.65,0:00:34.06,Default,,0,0,0,,{\fad(70,70)}the interesting thing\Nabout features
+Dialogue: 0,0:00:34.06,0:00:35.56,Default,,0,0,0,,{\fad(70,70)}is that some\Nof the
+Dialogue: 0,0:00:35.56,0:00:38.60,Default,,0,0,0,,{\fad(70,70)}people that probably\Nwould receive
+Dialogue: 0,0:00:38.60,0:00:40.46,Default,,0,0,0,,{\fad(70,70)}the most amount\Nof money
+Dialogue: 0,0:00:40.46,0:00:42.11,Default,,0,0,0,,{\fad(70,70)}off a {\c&H46BEF7&\b1}feature{\c&HFFFFFF&\b1}\Nlike when
+Dialogue: 0,0:00:42.11,0:00:44.43,Default,,0,0,0,,{\fad(70,70)}we're talking about\Npeople like
+Dialogue: 0,0:00:44.43,0:00:46.24,Default,,0,0,0,,{\fad(70,70)}a {\c&H46BEF7&\b1}Snoop{\c&HFFFFFF&\b1} or\Na Kendrick
+Dialogue: 0,0:00:46.24,0:00:47.62,Default,,0,0,0,,{\fad(70,70)}or a Drake\Nor you
+Dialogue: 0,0:00:47.62,0:00:49.89,Default,,0,0,0,,{\fad(70,70)}know I mean\Nthese numbers
+Dialogue: 0,0:00:49.89,0:00:51.76,Default,,0,0,0,,{\fad(70,70)}are nothing\Nto them.
+Dialogue: 0,0:00:51.76,0:00:53.29,Default,,0,0,0,,{\fad(70,70)}Not even that\Nthey're nothing
+Dialogue: 0,0:00:53.29,0:00:54.37,Default,,0,0,0,,{\fad(70,70)}I mean the\Nnumbers can
+Dialogue: 0,0:00:54.37,0:00:55.83,Default,,0,0,0,,{\fad(70,70)}be limitless I\Nmean imagine
+Dialogue: 0,0:00:55.83,0:00:57.36,Default,,0,0,0,,{\fad(70,70)}what these people\Ncan charge
+Dialogue: 0,0:00:57.36,0:00:58.63,Default,,0,0,0,,{\fad(70,70)}but on the\Nother hand
+Dialogue: 0,0:00:58.63,0:01:00.06,Default,,0,0,0,,{\fad(70,70)}they do it\Nbecause they
+Dialogue: 0,0:01:00.06,0:01:01.10,Default,,0,0,0,,{\fad(70,70)}want to do\Nit you
+Dialogue: 0,0:01:01.10,0:01:01.70,Default,,0,0,0,,{\fad(70,70)}know.

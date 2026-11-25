@@ -1,0 +1,48 @@
+{
+  "id": "word-stagger",
+  "name": "Word Stagger",
+  "version": 1,
+  "description": "Editable animated text style: Word Stagger.",
+  "tags": [
+    "word-by-word",
+    "emphasis",
+    "social"
+  ],
+  "sampleText": "EVERY WORD COUNTS",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Arial, sans-serif",
+    "fontSize": 88,
+    "fontWeight": 900,
+    "color": "#FFFFFF",
+    "accentColor": "#FFCF3F",
+    "letterSpacing": 1,
+    "strokeColor": "#151515",
+    "strokeWidth": 5
+  },
+  "shape": {
+    "background": "transparent",
+    "padding": "18px 30px",
+    "borderRadius": 0
+  },
+  "animation": {
+    "type": "word-stagger",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

@@ -1,0 +1,39 @@
+﻿[Script Info]
+Title: Local timed speech captions
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Default,Arial,62,&H00FFFFFF,&H0046BEF7,&H002F2114,&H64000000,1,0,0,0,100,100,0,0,1,5,2,2,72,72,510,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.05,0:00:01.99,Default,,0,0,0,,{\fad(70,70)}What {\c&H46BEF7&\b1}Clue{\c&HFFFFFF&\b1} was\Nable to
+Dialogue: 0,0:00:01.99,0:00:03.93,Default,,0,0,0,,{\fad(70,70)}do was pretty\Nmuch get
+Dialogue: 0,0:00:03.93,0:00:06.12,Default,,0,0,0,,{\fad(70,70)}{\c&H46BEF7&\b1}music{\c&HFFFFFF&\b1} that hit\Nthe streets
+Dialogue: 0,0:00:06.12,0:00:07.76,Default,,0,0,0,,{\fad(70,70)}before it hit\Nanywhere else.
+Dialogue: 0,0:00:07.76,0:00:08.80,Default,,0,0,0,,{\fad(70,70)}So, you know,\Nand that
+Dialogue: 0,0:00:08.80,0:00:09.62,Default,,0,0,0,,{\fad(70,70)}was the era\Nwhere I
+Dialogue: 0,0:00:09.62,0:00:10.60,Default,,0,0,0,,{\fad(70,70)}really came up\Nwith and
+Dialogue: 0,0:00:10.60,0:00:12.34,Default,,0,0,0,,{\fad(70,70)}got, like, super\Nfascinated with
+Dialogue: 0,0:00:12.34,0:00:13.67,Default,,0,0,0,,{\fad(70,70)}{\c&H46BEF7&\b1}mixtape{\c&HFFFFFF&\b1} culture because\NI felt
+Dialogue: 0,0:00:13.67,0:00:14.41,Default,,0,0,0,,{\fad(70,70)}like I was\Nahead of
+Dialogue: 0,0:00:14.41,0:00:15.16,Default,,0,0,0,,{\fad(70,70)}the curve and\NI was
+Dialogue: 0,0:00:15.16,0:00:16.64,Default,,0,0,0,,{\fad(70,70)}getting all these\Nsongs on
+Dialogue: 0,0:00:16.64,0:00:18.66,Default,,0,0,0,,{\fad(70,70)}these mixtapes that,\Nlike, weren't
+Dialogue: 0,0:00:18.66,0:00:20.22,Default,,0,0,0,,{\fad(70,70)}available on\Nthe radio.
+Dialogue: 0,0:00:20.22,0:00:21.28,Default,,0,0,0,,{\fad(70,70)}You didn't see\Nthe video
+Dialogue: 0,0:00:21.28,0:00:22.41,Default,,0,0,0,,{\fad(70,70)}on YomTV raps,\Nlike, you
+Dialogue: 0,0:00:22.41,0:00:23.35,Default,,0,0,0,,{\fad(70,70)}know, it wasn't\Non the
+Dialogue: 0,0:00:23.35,0:00:24.16,Default,,0,0,0,,{\fad(70,70)}album yet.
+Dialogue: 0,0:00:24.16,0:00:25.70,Default,,0,0,0,,{\fad(70,70)}It was just,\Nlike, you
+Dialogue: 0,0:00:25.70,0:00:27.80,Default,,0,0,0,,{\fad(70,70)}know, I remember\Nhearing songs
+Dialogue: 0,0:00:27.80,0:00:29.36,Default,,0,0,0,,{\fad(70,70)}that had Biggie\Nand Tupac
+Dialogue: 0,0:00:29.36,0:00:30.81,Default,,0,0,0,,{\fad(70,70)}on them that,\Nlike, the
+Dialogue: 0,0:00:30.81,0:00:32.15,Default,,0,0,0,,{\fad(70,70)}world still doesn't\Nknow about
+Dialogue: 0,0:00:32.15,0:00:33.16,Default,,0,0,0,,{\fad(70,70)}that I heard\Non, like,
+Dialogue: 0,0:00:33.16,0:00:33.80,Default,,0,0,0,,{\fad(70,70)}a {\c&H46BEF7&\b1}mixtape.{\c&HFFFFFF&\b1}

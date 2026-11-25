@@ -1,0 +1,48 @@
+{
+  "id": "outline-reveal",
+  "name": "Outline Reveal",
+  "version": 1,
+  "description": "Editable animated text style: Outline Reveal.",
+  "tags": [
+    "outline",
+    "title",
+    "minimal"
+  ],
+  "sampleText": "BIG IDEAS",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Arial, sans-serif",
+    "fontSize": 100,
+    "fontWeight": 900,
+    "color": "transparent",
+    "accentColor": "#68E0FF",
+    "letterSpacing": 3,
+    "strokeColor": "#68E0FF",
+    "strokeWidth": 3
+  },
+  "shape": {
+    "background": "transparent",
+    "padding": "18px 30px",
+    "borderRadius": 0
+  },
+  "animation": {
+    "type": "outline-reveal",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

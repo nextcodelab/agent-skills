@@ -1,0 +1,76 @@
+// SpiralBlockWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/SpiralBlockWipe.glsl
+// Author: gre
+// License: MIT
+// Description: Square blocks switch to the incoming image one after another along a rectangular spiral, from the border inward or from the center outward
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform ivec2 grid; 
+
+uniform int inward; 
+
+uniform int clockwise; 
+
+uniform float smoothness; 
+
+float spiralIndex(vec2 c, vec2 n) {
+  
+  float k = min(min(c.x, c.y), min(n.x - 1.0 - c.x, n.y - 1.0 - c.y));
+  
+  vec2 s = n - 2.0 * k;
+  vec2 l = c - k;
+  
+  float before = n.x * n.y - s.x * s.y;
+  float along;
+  if (l.y == 0.0) along = l.x; 
+  else if (l.x == s.x - 1.0) along = s.x - 1.0 + l.y; 
+  else if (l.y == s.y - 1.0) along = 2.0 * s.x + s.y - 3.0 - l.x; 
+  else along = 2.0 * (s.x - 1.0) + 2.0 * (s.y - 1.0) - l.y; 
+  return before + along;
+}
+
+vec4 transition(vec2 uv) {
+  if (progress <= 0.0) return getFromColor(uv);
+  if (progress >= 1.0) return getToColor(uv);
+
+  vec2 n = max(vec2(grid), vec2(1.0));
+  
+  vec2 c = min(floor(vec2(uv.x, 1.0 - uv.y) * n), n - 1.0);
+  
+  
+  if ((clockwise != 0) != (inward != 0)) {
+    c = c.yx;
+    n = n.yx;
+  }
+  float count = n.x * n.y;
+  float i = spiralIndex(c, n);
+  if (!(inward != 0)) i = count - 1.0 - i;
+
+  
+  
+  float w = max(smoothness, 0.0) * count;
+  float o = max(0.5 * (1.0 - w), 0.0);
+  float x = progress * (count - 1.0 + 2.0 * o + w) - i - o;
+  float m = w > 0.0 ? smoothstep(0.0, w, x) : step(0.0, x);
+
+  if (m <= 0.0) return getFromColor(uv);
+  if (m >= 1.0) return getToColor(uv);
+  vec4 a = getFromColor(uv);
+  vec4 b = getToColor(uv);
+  
+  vec4 col = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
+  return col.a > 0.0 ? vec4(col.rgb / col.a, col.a) : vec4(0.0);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

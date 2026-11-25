@@ -1,0 +1,48 @@
+{
+  "id": "split-rise",
+  "name": "Split Rise",
+  "version": 1,
+  "description": "Editable animated text style: Split Rise.",
+  "tags": [
+    "story",
+    "reveal",
+    "word-by-word"
+  ],
+  "sampleText": "BUILT FROM NOTHING",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Arial, sans-serif",
+    "fontSize": 78,
+    "fontWeight": 900,
+    "color": "#FFFFFF",
+    "accentColor": "#52E0C4",
+    "letterSpacing": 1,
+    "strokeColor": "#101010",
+    "strokeWidth": 4
+  },
+  "shape": {
+    "background": "transparent",
+    "padding": "18px 30px",
+    "borderRadius": 0
+  },
+  "animation": {
+    "type": "split-rise",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

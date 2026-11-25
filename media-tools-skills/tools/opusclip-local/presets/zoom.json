@@ -1,0 +1,7 @@
+{
+  "slow-in":{"description":"Gentle full-clip center zoom from 100% to the selected amount.","default_amount":0.12,"tags":["zoom","smooth","podcast"]},
+  "slow-out":{"description":"Gentle full-clip center zoom out from the selected amount to 100%.","default_amount":0.12,"tags":["zoom","smooth","reveal"]},
+  "punch-in":{"description":"Quick center punch-in, then hold the tighter frame.","default_amount":0.12,"default_duration_seconds":0.4,"tags":["zoom","emphasis","hook"]},
+  "punch-out":{"description":"Quick pull-back to reveal more of the portrait frame.","default_amount":0.12,"default_duration_seconds":0.4,"tags":["zoom","reveal","emphasis"]},
+  "pulse":{"description":"Subtle repeating zoom pulse for short emphasis beats.","default_amount":0.12,"tags":["zoom","pulse","emphasis"]}
+}

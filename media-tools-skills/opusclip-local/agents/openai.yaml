@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpusClip Local"
+  short_description: "Create short-form video edits with local tools"
+  default_prompt: "Use $opusclip-local to turn my source footage into polished short-form clips using local tools."

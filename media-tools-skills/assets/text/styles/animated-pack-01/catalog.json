@@ -1,0 +1,153 @@
+{
+  "pack": "animated-text-pack-01",
+  "version": 1,
+  "description": "Editable local animated-text presets for hooks, callouts, lower thirds, and word emphasis.",
+  "runtime": "runtime/gsap-text-animation.js",
+  "preview": "preview.html",
+  "presets": [
+    {
+      "id": "impact-pop",
+      "name": "Impact Pop",
+      "file": "presets/impact-pop.json",
+      "preview": "previews/impact-pop.svg",
+      "animation": "pop",
+      "tags": [
+        "hook",
+        "bold",
+        "reaction"
+      ]
+    },
+    {
+      "id": "soft-slide",
+      "name": "Soft Slide",
+      "file": "presets/soft-slide.json",
+      "preview": "previews/soft-slide.svg",
+      "animation": "fade-up",
+      "tags": [
+        "clean",
+        "interview",
+        "lower-third"
+      ]
+    },
+    {
+      "id": "typewriter",
+      "name": "Typewriter",
+      "file": "presets/typewriter.json",
+      "preview": "previews/typewriter.svg",
+      "animation": "typewriter",
+      "tags": [
+        "typewriter",
+        "documentary",
+        "reveal"
+      ]
+    },
+    {
+      "id": "word-stagger",
+      "name": "Word Stagger",
+      "file": "presets/word-stagger.json",
+      "preview": "previews/word-stagger.svg",
+      "animation": "word-stagger",
+      "tags": [
+        "word-by-word",
+        "emphasis",
+        "social"
+      ]
+    },
+    {
+      "id": "neon-flicker",
+      "name": "Neon Flicker",
+      "file": "presets/neon-flicker.json",
+      "preview": "previews/neon-flicker.svg",
+      "animation": "neon-flicker",
+      "tags": [
+        "neon",
+        "music",
+        "night"
+      ]
+    },
+    {
+      "id": "marker-swipe",
+      "name": "Marker Swipe",
+      "file": "presets/marker-swipe.json",
+      "preview": "previews/marker-swipe.svg",
+      "animation": "marker-wipe",
+      "tags": [
+        "highlight",
+        "education",
+        "callout"
+      ]
+    },
+    {
+      "id": "tracking-reveal",
+      "name": "Tracking Reveal",
+      "file": "presets/tracking-reveal.json",
+      "preview": "previews/tracking-reveal.svg",
+      "animation": "tracking-reveal",
+      "tags": [
+        "title",
+        "cinematic",
+        "minimal"
+      ]
+    },
+    {
+      "id": "bounce-emphasis",
+      "name": "Bounce Emphasis",
+      "file": "presets/bounce-emphasis.json",
+      "preview": "previews/bounce-emphasis.svg",
+      "animation": "bounce",
+      "tags": [
+        "reaction",
+        "humor",
+        "emphasis"
+      ]
+    },
+    {
+      "id": "split-rise",
+      "name": "Split Rise",
+      "file": "presets/split-rise.json",
+      "preview": "previews/split-rise.svg",
+      "animation": "split-rise",
+      "tags": [
+        "story",
+        "reveal",
+        "word-by-word"
+      ]
+    },
+    {
+      "id": "clean-lower-third",
+      "name": "Clean Lower Third",
+      "file": "presets/clean-lower-third.json",
+      "preview": "previews/clean-lower-third.svg",
+      "animation": "slide-left",
+      "tags": [
+        "lower-third",
+        "interview",
+        "clean"
+      ]
+    },
+    {
+      "id": "glitch-caption",
+      "name": "Glitch Caption",
+      "file": "presets/glitch-caption.json",
+      "preview": "previews/glitch-caption.svg",
+      "animation": "glitch",
+      "tags": [
+        "glitch",
+        "bold",
+        "music"
+      ]
+    },
+    {
+      "id": "outline-reveal",
+      "name": "Outline Reveal",
+      "file": "presets/outline-reveal.json",
+      "preview": "previews/outline-reveal.svg",
+      "animation": "outline-reveal",
+      "tags": [
+        "outline",
+        "title",
+        "minimal"
+      ]
+    }
+  ]
+}

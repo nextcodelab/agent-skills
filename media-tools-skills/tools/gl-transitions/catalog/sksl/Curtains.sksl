@@ -1,0 +1,60 @@
+// Curtains — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/Curtains.glsl
+// Author: gre
+// License: MIT
+// Description: The outgoing image parts in the middle like stage curtains, gathering into shaded folds as it is pulled to the sides
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float folds; 
+
+uniform float shading; 
+
+uniform float bunch; 
+
+uniform float sway; 
+
+const float PI = 3.141592653589793;
+
+vec4 transition (vec2 uv) {
+  
+  float lag = sway * (1.0 - uv.y);
+  float p = progress * (1.0 - lag * (1.0 - progress));
+  float open = mix(p, p * p * (3.0 - 2.0 * p), 0.75);
+  
+  float edge = -bunch * open * open;
+  float w = mix(0.5, bunch, open);
+  float x = min(uv.x, 1.0 - uv.x) - edge; 
+  if (x >= w) {
+    
+    vec4 to = getToColor(uv);
+    float shadow = 0.4 * exp((w - x) * 25.0) * clamp((edge + w) * 20.0, 0.0, 1.0);
+    return vec4(to.rgb * (1.0 - shadow * open), to.a);
+  }
+  float t = x / w;
+  
+  float n = max(1.0, floor(folds * min(ratio, 1.0) + 0.5)); 
+  float a = 2.0 * PI * n * t;
+  float f = 1.0 - (1.0 - open) * (1.0 - open) * (1.0 - open); 
+  float gather = 0.92 * f;
+  float s = 0.5 * (t + gather * sin(a) / (2.0 * PI * n)); 
+  vec4 c = getFromColor(vec2(uv.x < 0.5 ? s : 1.0 - s, uv.y));
+  
+  float slope = 3.0 * gather * cos(a) * (uv.x < 0.5 ? 1.0 : -1.0);
+  float diffuse = (1.0 + 0.5 * slope) / sqrt(1.25 * (1.0 + slope * slope));
+  float crease = 0.5 + 0.5 * sin(a); 
+  float light = mix(1.0, diffuse * (1.0 - 0.6 * crease * crease), shading * f);
+  return vec4(c.rgb * light, c.a);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

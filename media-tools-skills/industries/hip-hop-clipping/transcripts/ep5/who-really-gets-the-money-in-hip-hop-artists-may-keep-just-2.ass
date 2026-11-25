@@ -1,0 +1,37 @@
+﻿[Script Info]
+Title: Local timed speech captions
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Default,Arial,62,&H00FFFFFF,&H0046BEF7,&H002F2114,&H64000000,1,0,0,0,100,100,0,0,1,5,2,2,72,72,510,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.00,0:00:01.20,Default,,0,0,0,,{\fad(70,70)}- Who is\Nit that
+Dialogue: 0,0:00:01.20,0:00:02.82,Default,,0,0,0,,{\fad(70,70)}makes the {\c&H46BEF7&\b1}money{\c&HFFFFFF&\b1}\Nin the
+Dialogue: 0,0:00:02.82,0:00:03.72,Default,,0,0,0,,{\fad(70,70)}hip-hop?
+Dialogue: 0,0:00:03.72,0:00:05.34,Default,,0,0,0,,{\fad(70,70)}Is it the\Nartist makes
+Dialogue: 0,0:00:05.34,0:00:06.05,Default,,0,0,0,,{\fad(70,70)}{\c&H46BEF7&\b1}money?{\c&HFFFFFF&\b1}
+Dialogue: 0,0:00:06.05,0:00:07.68,Default,,0,0,0,,{\fad(70,70)}Do they have\Na manager
+Dialogue: 0,0:00:07.68,0:00:09.39,Default,,0,0,0,,{\fad(70,70)}that's taking\Na cut?
+Dialogue: 0,0:00:09.39,0:00:11.37,Default,,0,0,0,,{\fad(70,70)}An agent's taking\Na cut?
+Dialogue: 0,0:00:11.37,0:00:12.80,Default,,0,0,0,,{\fad(70,70)}A PR person\Ntaking a
+Dialogue: 0,0:00:12.80,0:00:13.40,Default,,0,0,0,,{\fad(70,70)}cut?
+Dialogue: 0,0:00:13.40,0:00:15.24,Default,,0,0,0,,{\fad(70,70)}A label's taking\Na cut?
+Dialogue: 0,0:00:15.24,0:00:15.87,Default,,0,0,0,,{\fad(70,70)}Yeah.
+Dialogue: 0,0:00:15.87,0:00:16.77,Default,,0,0,0,,{\fad(70,70)}Who is\Nit?
+Dialogue: 0,0:00:16.77,0:00:18.21,Default,,0,0,0,,{\fad(70,70)}All of\Nthe above.
+Dialogue: 0,0:00:18.21,0:00:21.43,Default,,0,0,0,,{\fad(70,70)}I mean, obviously,\N{\c&H46BEF7&\b1}artists{\c&HFFFFFF&\b1} definitely
+Dialogue: 0,0:00:21.43,0:00:22.46,Default,,0,0,0,,{\fad(70,70)}make {\c&H46BEF7&\b1}money.{\c&HFFFFFF&\b1}
+Dialogue: 0,0:00:22.46,0:00:24.45,Default,,0,0,0,,{\fad(70,70)}If 100 bucks\Ncome in
+Dialogue: 0,0:00:24.45,0:00:26.71,Default,,0,0,0,,{\fad(70,70)}from all those\Nsources of
+Dialogue: 0,0:00:26.71,0:00:27.63,Default,,0,0,0,,{\fad(70,70)}revenue you were\Ntalking about,
+Dialogue: 0,0:00:27.63,0:00:28.23,Default,,0,0,0,,{\fad(70,70)}how much do\Nyou think
+Dialogue: 0,0:00:28.23,0:00:28.83,Default,,0,0,0,,{\fad(70,70)}the artist\Nsees?
+Dialogue: 0,0:00:28.83,0:00:29.43,Default,,0,0,0,,{\fad(70,70)}Out of $100,\Nmaybe $2.
+Dialogue: 0,0:00:29.43,0:00:30.12,Default,,0,0,0,,{\fad(70,70)}Holy shit.

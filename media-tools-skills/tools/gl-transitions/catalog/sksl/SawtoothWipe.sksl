@@ -1,0 +1,83 @@
+// SawtoothWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/SawtoothWipe.glsl
+// Author: gre
+// License: MIT
+// Description: A wipe whose edge is a row of sharp, regular triangular teeth sweeps across the frame, or two toothed edges that start interlocked part from the middle like jaws opening
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform vec2 direction; 
+
+uniform int teeth; 
+
+uniform float depth; 
+
+uniform int jaws; 
+
+uniform float smoothness; 
+
+const float AA = 0.0015;
+
+float zigzag(vec2 q, float w, float h) {
+  
+  float x = abs(fract(q.x / w) - 0.5) * w;
+  vec2 a = vec2(0.0, -0.5 * h);
+  vec2 ab = vec2(0.5 * w, h);
+  vec2 aq = vec2(x, q.y) - a;
+  float d = length(aq - ab * clamp(dot(aq, ab) / dot(ab, ab), 0.0, 1.0));
+  return q.y > h * (2.0 * x / w - 0.5) ? d : -d;
+}
+
+vec4 transition(vec2 uv) {
+  vec4 a = getFromColor(uv);
+  vec4 b = getToColor(uv);
+  if (progress <= 0.0) return a;
+  if (progress >= 1.0) return b;
+
+  vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);
+  
+  vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
+  
+  float e = 0.5 * (abs(dir.x) * ratio + abs(dir.y));
+  float w = 0.5 * (abs(dir.y) * ratio + abs(dir.x));
+  float period = 2.0 * w / float(teeth < 1 ? 1 : teeth);
+  
+  
+  vec2 q = vec2(dot(p, vec2(-dir.y, dir.x)) + w + 0.5 * period, dot(p, dir));
+  float h = max(depth, 0.0) * period;
+  
+  float s = max(min(smoothness, 0.25 * period), AA);
+  float t = mix(progress, progress * progress * (3.0 - 2.0 * progress), 0.35);
+
+  float d;
+  if ((jaws != 0)) {
+    
+    
+    
+    float overlap = s * sqrt(1.0 + 4.0 * h * h / (period * period));
+    float o = mix(-overlap, e + 0.5 * h + s, t);
+    d = max(zigzag(q - vec2(0.0, o), period, h), -zigzag(q + vec2(0.0, o), period, h));
+  } else {
+    
+    float c = mix(-e - 0.5 * h - s, e + 0.5 * h + s, t);
+    d = zigzag(q - vec2(0.0, c), period, h);
+  }
+  
+  float m = 1.0 - smoothstep(-s, s, d);
+
+  
+  vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
+  return c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

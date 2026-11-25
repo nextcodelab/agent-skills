@@ -1,0 +1,48 @@
+{
+  "id": "soft-slide",
+  "name": "Soft Slide",
+  "version": 1,
+  "description": "Editable animated text style: Soft Slide.",
+  "tags": [
+    "clean",
+    "interview",
+    "lower-third"
+  ],
+  "sampleText": "A story worth hearing",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Segoe UI, Arial, sans-serif",
+    "fontSize": 78,
+    "fontWeight": 700,
+    "color": "#FFFFFF",
+    "accentColor": "#68E0CF",
+    "letterSpacing": 0,
+    "strokeColor": "transparent",
+    "strokeWidth": 0
+  },
+  "shape": {
+    "background": "#15191FCC",
+    "padding": "18px 30px",
+    "borderRadius": 22
+  },
+  "animation": {
+    "type": "fade-up",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

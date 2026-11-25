@@ -1,0 +1,109 @@
+// KeyholeWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/KeyholeWipe.glsl
+// Author: gre
+// License: MIT
+// Description: A keyhole grows steadily from the center until the incoming image fills the frame, its bevelled rim and inner shadow making it read as a hole cut in a plate
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform vec2 center; 
+
+uniform float rim; 
+
+uniform float smoothness; 
+
+const float SLOT_HE = 0.23;
+const float SLOT_TOP = 0.085;
+const float SLOT_BOTTOM = 0.165;
+const float SLOT_ROUND = 0.025;
+
+const float GROW_Y = 0.1;
+
+const float BEVEL = 0.028;
+const float SHADE = 0.05;
+
+float dot2(vec2 v) { return dot(v, v); }
+
+float sdSlot(vec2 p) {
+  p.y -= -0.17;
+  float r1 = SLOT_BOTTOM - SLOT_ROUND;
+  float r2 = SLOT_TOP - SLOT_ROUND;
+  float he = SLOT_HE - SLOT_ROUND;
+  vec2 k1 = vec2(r2, he);
+  vec2 k2 = vec2(r2 - r1, 2.0 * he);
+  p.x = abs(p.x);
+  vec2 ca = vec2(p.x - min(p.x, p.y < 0.0 ? r1 : r2), abs(p.y) - he);
+  vec2 cb = p - k1 + k2 * clamp(dot(k1 - p, k2) / dot2(k2), 0.0, 1.0);
+  float s = (cb.x < 0.0 && ca.y < 0.0) ? -1.0 : 1.0;
+  return s * sqrt(min(dot2(ca), dot2(cb))) - SLOT_ROUND;
+}
+
+float sdKeyhole(vec2 p) {
+  return min(length(p - vec2(0.0, 0.2)) - 0.25, sdSlot(p));
+}
+
+float reach(vec2 p) {
+  vec2 h = vec2(0.0, 0.2) - vec2(0.0, GROW_Y);
+  float k = 0.25 * 0.25 - dot2(h);
+  float b = dot(p, h);
+  return (sqrt(b * b + k * dot2(p)) - b) / k;
+}
+
+vec4 transition (vec2 uv) {
+  vec4 a = getFromColor(uv);
+  vec4 b = getToColor(uv);
+  vec2 asp = vec2(ratio, 1.0);
+  vec2 c = center * asp;
+  float sm = max(smoothness, 0.0005);
+
+  
+  
+  vec2 o = c;
+  vec2 lo = -o - 2.5 * sm;
+  vec2 hi = asp - o + 2.5 * sm;
+  float full = max(max(reach(lo), reach(hi)), max(reach(vec2(lo.x, hi.y)), reach(vec2(hi.x, lo.y))));
+
+  
+  float p = progress;
+  float s = full * p;
+  if (s <= 0.0) return a;
+
+  vec2 q = (uv * asp - o) / s + vec2(0.0, GROW_Y);
+  float d = sdKeyhole(q);
+  
+  float hole = 1.0 - smoothstep(-sm, sm, d * s + sm);
+
+  float fade = smoothstep(0.0, 0.08, p) * (1.0 - smoothstep(0.7, 1.0, p));
+  float rimA = rim * fade;
+  if (rimA > 0.0) {
+    
+    
+    vec2 e = vec2(0.002, 0.0);
+    vec2 n = vec2(sdKeyhole(q + e) - sdKeyhole(q - e), sdKeyhole(q + e.yx) - sdKeyhole(q - e.yx));
+    float lit = -dot(n / max(length(n), 1e-6), vec2(-0.35, 0.94));
+    float bevel = 1.0 - smoothstep(0.0, BEVEL, d);
+    float shade = exp(-max(d, 0.0) / SHADE);
+    a.rgb *= 1.0 - rimA * (0.35 * shade + bevel * 0.4 * max(-lit, 0.0));
+    a.rgb += rimA * bevel * bevel * 0.3 * max(lit, 0.0) * a.a;
+
+    
+    
+    float wall = smoothstep(-0.03, 0.03, sdKeyhole(q + vec2(0.0, 0.05)));
+    float vign = exp(min(d, 0.0) / SHADE);
+    b.rgb *= 1.0 - rimA * (0.5 * wall + 0.3 * vign);
+  }
+
+  return mix(a, b, hole);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "items": [
+    {"id":"synthetic-soft-piano-v1","file":"synthetic/soft-piano.wav","kind":"synthetic-piano-like-chord","duration_seconds":1.5,"tags":["gentle","reveal","birthday","warm"],"source":"Original procedural synthesis by tools/media-lab/scripts/synth_sfx.py","license":"Original local generation"},
+    {"id":"synthetic-bright-piano-v1","file":"synthetic/bright-piano.wav","kind":"synthetic-piano-like-chord","duration_seconds":1.2,"tags":["bright","reveal","success","uplifting"],"source":"Original procedural synthesis by tools/media-lab/scripts/synth_sfx.py","license":"Original local generation"},
+    {"id":"synthetic-soft-impact-v1","file":"synthetic/soft-impact.wav","kind":"synthetic-impact","duration_seconds":0.7,"tags":["soft","transition","emphasis"],"source":"Original procedural synthesis by tools/media-lab/scripts/synth_sfx.py","license":"Original local generation"},
+    {"id":"synthetic-sparkle-v1","file":"synthetic/sparkle.wav","kind":"synthetic-chime","duration_seconds":1.0,"tags":["sparkle","reveal","playful"],"source":"Original procedural synthesis by tools/media-lab/scripts/synth_sfx.py","license":"Original local generation"},
+    {"id":"synthetic-whoosh-v1","file":"synthetic/whoosh.wav","kind":"synthetic-whoosh","duration_seconds":1.0,"tags":["sweep","transition","motion"],"source":"Original procedural synthesis by tools/media-lab/scripts/synth_sfx.py","license":"Original local generation"}
+  ]
+}

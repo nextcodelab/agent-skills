@@ -1,0 +1,14 @@
+{
+  "description": "15-second from-scratch vertical showcase of editable text presets.",
+  "styles": [
+    "soft-slide",
+    "impact-pop",
+    "marker-swipe",
+    "clean-lower-third",
+    "word-stagger"
+  ],
+  "resolution": "1080x1920",
+  "footage": "None",
+  "duration": 15,
+  "title": "Sample Text Style Test Reel"
+}

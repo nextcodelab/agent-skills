@@ -1,0 +1,3444 @@
+# gl-transitions
+
+> The open collection of GL Transitions: 227 GLSL shaders that turn one image into another as `progress` goes from 0 to 1. The npm package also ships SkSL (Skia), GLSL ES 3.00, WGSL (WebGPU) and Metal versions of those that translate. Packages built from it: React Native Skia (SkSL), Remotion (GLSL with WebGL 2), Rust (every source), Swift (Metal) and Android (AGSL). This document describes gl-transitions@3.3.0 (npm).
+
+Every transition is GLSL (WebGL 1 / GLSL ES 1.00) that implements `vec4 transition(vec2 uv)`. The host provides:
+
+- `float progress`: 0.0 shows only the outgoing image, 1.0 only the incoming one
+- `float ratio`: output width / height
+- `vec4 getFromColor(vec2 uv)` and `vec4 getToColor(vec2 uv)`: sample the outgoing and incoming images (uv in [0, 1], origin at the bottom left)
+- one uniform per parameter, set to its default unless the user picks another value
+- one `sampler2D` per extra texture, for the few transitions that list `textures`
+
+SkSL versions (`sksl/<name>.sksl`) are standalone Skia runtime effects: children `_from`, `_to` (then one per extra texture), uniforms `float2 _resolution` (output size in pixels), `progress`, `ratio` and each parameter by name (`bool` parameters are `int` 0 or 1), entry point `half4 main(float2 coord)` with a top-left origin. Draw both images at the output size.
+
+The same transitions as GLSL ES 3.00, WGSL and Metal are at `glsl3/<name>.glsl`, `wgsl/<name>.wgsl` and `msl/<name>.metal` (contracts in the package README, uniform layouts in `layouts.json`); `compatibility.json` lists the transitions each target supports.
+
+Install: `npm install gl-transitions` (`import transitions from "gl-transitions"`), or fetch the files below. Latest version: https://cdn.jsdelivr.net/npm/gl-transitions@3/
+
+Packages built from it:
+
+- [React Native Skia](https://github.com/gl-transitions/gl-transitions/tree/gl-transitions@3.3.0/packages/react-native-skia): `@gl-transitions/react-native-skia`, a `<Transition>` component drawing the SkSL versions
+- [Remotion](https://github.com/gl-transitions/gl-transitions/tree/gl-transitions@3.3.0/packages/remotion): `@gl-transitions/remotion`, `glTransition()` presentations for `<TransitionSeries>`, drawing the GLSL with WebGL 2
+- [Rust](https://github.com/gl-transitions/gl-transitions/tree/gl-transitions@3.3.0/crates/gl-transitions): the `gl-transitions` crate, every source with typed parameters and packed uniforms
+- [Swift](https://github.com/gl-transitions/gl-transitions/tree/gl-transitions@3.3.0/swift): the `GLTransitions` package (Metal renderer, AVFoundation compositor), from gl-transitions-swift
+- [Android](https://github.com/gl-transitions/gl-transitions/tree/gl-transitions@3.3.0/android): `com.gl-transitions:gl-transitions` on Maven Central, AGSL shaders (drawing needs Android 13+)
+
+## Accordion
+
+The outgoing image folds up like a pleated paper toward one side while the incoming one unfolds out of the other, both in 3D with lit and shadowed pleats
+
+- Tags: fold, 3d, slide, stripes
+- Parameters:
+  - `pleats` (int = 4) [range 1 to 12 step 1]: Number of pleats in each image (a pleat is a pair of panels, one lit and one in the shade)
+  - `direction` (vec2 = vec2(-1, 0)): Direction in which the images move, snapped to its main axis (left, right, up or down): the outgoing image folds up toward it, the incoming one unfolds from the opposite side
+  - `shading` (float = 0.7) [range 0 to 1]: Contrast between the lit and the shaded panels
+  - `perspective` (float = 1.5) [range 0 to 3]: Amount of perspective: the valleys between the pleats recede
+  - `backColor` (vec4 = vec4(0, 0, 0, 1)) [color]: Color seen around the folded images, where the valleys recede
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Accordion.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Accordion.sksl
+- Preview: https://gl-transitions.com/editor/Accordion
+
+## ApertureWipe
+
+A camera aperture opens its turning blades to reveal the incoming image
+
+- Tags: shape, wipe, iris, rotate
+- Parameters:
+  - `blades` (int = 6) [range 3 to 12]: Number of blades
+  - `rotation` (float = 60) [range -180 to 180]: How much the blades turn while opening, in degrees
+  - `shadow` (float = 0.5) [range 0 to 1]: How dark the blades are shaded along their edges
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ApertureWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ApertureWipe.sksl
+- Preview: https://gl-transitions.com/editor/ApertureWipe
+
+## ArrowWipe
+
+A notched arrowhead window onto the incoming image flies in from the edge behind it (or appears at the center), then swells until it fills the frame
+
+- Tags: shape, wipe, arrow, chevron, directional
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0)): Direction the arrow points and flies toward
+  - `notch` (float = 0.4) [range 0 to 0.9]: Depth of the notch at the back of the arrowhead (0 for a plain triangle)
+  - `width` (float = 80) [range 20 to 160]: Opening angle of the arrowhead's tip, in degrees
+  - `count` (int = 1) [range 1 to 3 step 1]: Number of nested chevrons flying in a row
+  - `origin` (bool = false): Grow the arrow from the center of the frame instead of flying it in
+  - `smoothness` (float = 0.004) [range 0 to 0.1]: Softness of the arrow's edges
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ArrowWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ArrowWipe.sksl
+- Preview: https://gl-transitions.com/editor/ArrowWipe
+
+## Ascii
+
+The image turns into text-mode characters, denser where it is brighter, the characters scramble into those of the incoming image, then resolve back into it
+
+- Tags: text, pattern, retro, digital
+- Parameters:
+  - `cellSize` (float = 0.04) [range 0.01 to 0.1]: Height of a character, in frame heights
+  - `colored` (bool = true): Color the characters with the image (otherwise, with the ink color)
+  - `ink` (vec4 = vec4(0.3, 1, 0.45, 1)) [color]: Color of the characters when they are not colored with the image
+  - `background` (vec4 = vec4(0, 0, 0, 1)) [color]: Color behind the characters
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Ascii.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Ascii.sksl
+- Preview: https://gl-transitions.com/editor/Ascii
+
+## BandWipe
+
+Alternating bands wipe in from opposite sides together and interleave like fingers, while both images stay still
+
+- Tags: wipe, stripes, interleave, horizontal
+- Parameters:
+  - `bands` (int = 8) [range 2 to 40 step 1]: Number of bands
+  - `vertical` (bool = false): Cut the frame into columns that wipe up and down instead of rows that wipe sideways
+  - `smoothness` (float = 0.02) [range 0 to 0.2]: Softness of the bands' leading edges
+  - `stagger` (float = 0.1) [range 0 to 0.8]: Delay between the first and the last band, so they cascade from the top (or the left)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BandWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BandWipe.sksl
+- Preview: https://gl-transitions.com/editor/BandWipe
+
+## BlockCover
+
+Blocks of a solid color pop in at random over the outgoing image until they cover the frame, then pop out in another random order to show the incoming image
+
+- Tags: blocks, grid, squares, color, cover
+- Parameters:
+  - `blocks` (int = 16) [range 1 to 40 step 1]: Number of blocks along the longer side of the frame (the blocks stay about square)
+  - `color` (vec4 = vec4(0.95, 0.32, 0.26, 1)) [color]: Color of the blocks
+  - `pop` (float = 0.5) [range 0 to 1]: How much a block overshoots its cell as it pops in
+  - `smoothness` (float = 0.03) [range 0 to 0.5]: Softness of the blocks' edges, in blocks
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BlockCover.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BlockCover.sksl
+- Preview: https://gl-transitions.com/editor/BlockCover
+
+## BlockSlide
+
+The frame is cut into a grid of blocks that slide out one after another in a staggered cascade, some of them shrinking as they go, while the blocks of the incoming image slide in behind them to take their place
+
+- Tags: slide, blocks, grid, directional, zoom
+- Parameters:
+  - `grid` (ivec2 = ivec2(5, 4)): Number of blocks (columns, rows), at most 40 along the direction
+  - `direction` (vec2 = vec2(1, 0)): Direction the blocks slide toward (rounded to the nearest axis)
+  - `stagger` (float = 0.6) [range 0 to 0.95]: Share of the transition over which the blocks set off one after another (0 slides them all together)
+  - `zoom` (float = 0.35) [range 0 to 0.9]: How much the zooming blocks shrink on their way, as a share of their size
+  - `background` (vec4 = vec4(0, 0, 0, 1)) [color]: Color seen in the gaps between the blocks
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BlockSlide.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BlockSlide.sksl
+- Preview: https://gl-transitions.com/editor/BlockSlide
+
+## BloomDissolve
+
+The highlights of the outgoing image blow out into a soft, wide glow that floods the frame; under it the incoming image takes over, then the glow subsides back into its highlights while the image stays sharp
+
+- Tags: light, glow, bloom, dissolve
+- Parameters:
+  - `spread` (float = 0.25) [range 0 to 0.6]: Reach of the glow at the peak, in frame heights
+  - `threshold` (float = 0.6) [range 0 to 1]: Brightness above which the image glows (the whole frame does at the peak)
+  - `intensity` (float = 1.5) [range 0 to 4]: Brightness of the glow
+  - `tint` (vec3 = vec3(1, 0.9, 0.75)) [color]: Tint of the glow, toward its edges
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BloomDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BloomDissolve.sksl
+- Preview: https://gl-transitions.com/editor/BloomDissolve
+
+## BokehDissolve
+
+The image falls out of focus like a camera lens, its highlights swelling into large bright bokeh discs, and the incoming image sharpens back out of its own bokeh
+
+- Tags: blur, bokeh, lens, dissolve, light
+- Parameters:
+  - `radius` (float = 0.05) [range 0.01 to 0.15]: Radius of the bokeh discs at the peak, in frame heights
+  - `blades` (int = 0) [range 0 to 9]: Number of aperture blades, which shape the discs into polygons (below 3: round)
+  - `threshold` (float = 0.7) [range 0 to 1]: Brightness above which a pixel is a highlight that swells into a disc
+  - `intensity` (float = 1) [range 0 to 3]: Brightness of the bokeh discs
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BokehDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BokehDissolve.sksl
+- Preview: https://gl-transitions.com/editor/BokehDissolve
+
+## BookFlip
+
+The right half of the outgoing image is a book page that turns over from right to left on the spine at the middle of the frame, curling near its free edge, its back bringing the left half of the incoming image
+
+- Tags: page, flip, 3d
+- Parameters:
+  - `perspective` (float = 0.5) [range 0 to 1]: Strength of the perspective: the page grows as it lifts toward the viewer
+  - `shading` (float = 0.6) [range 0 to 1]: How much the page darkens as it turns away from the light, and the shadows it casts
+  - `curl` (float = 0.5) [range 0 to 1]: How much the page bends near its free edge, which trails behind as it turns
+- Author: hong
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BookFlip.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BookFlip.sksl
+- Preview: https://gl-transitions.com/editor/BookFlip
+
+## Bounce
+
+The outgoing image drops out of the frame with a few bounces, revealing the incoming one
+
+- Tags: bounce, slide, vertical, shadow
+- Parameters:
+  - `shadow_colour` (vec4 = vec4(0, 0, 0, 0.6)) [color]: Color of the shadow cast on the incoming image
+  - `shadow_height` (float = 0.075) [range 0.01 to 0.5]: Height of the shadow, relative to the image height
+  - `bounces` (float = 3) [range 1 to 10 step 1]: Number of bounces before settling
+- Author: Adrian Purser
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Bounce.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Bounce.sksl
+- Preview: https://gl-transitions.com/editor/Bounce
+
+## BowTie
+
+Two triangles grow from the top and bottom edges into a bow tie that reveals the incoming image, with an adjustable shape, and can run in reverse
+
+- Tags: wipe, shape
+- Parameters:
+  - `adjust` (float = 0.5)
+  - `reverse` (bool = false): Run the wipe in reverse
+- Author: KMojek
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BowTie.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BowTie.sksl
+- Preview: https://gl-transitions.com/editor/BowTie
+
+## BowTieHorizontal
+
+Two triangles grow from the left and right edges into a bow tie that reveals the incoming image
+
+- Tags: wipe, shape, horizontal
+- Parameters: none
+- Author: huynx
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BowTieHorizontal.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BowTieHorizontal.sksl
+- Preview: https://gl-transitions.com/editor/BowTieHorizontal
+
+## BrushWipe
+
+A few broad brush strokes sweep across the frame in turn, back and forth, painting in the incoming image with streaky bristle edges and dry, ragged ends
+
+- Tags: wipe, paint, brush, organic
+- Parameters:
+  - `strokes` (float = 4) [range 1 to 8 step 1]: Number of brush strokes needed to cover the frame
+  - `angle` (float = -7) [range -45 to 45]: Angle of the strokes, in degrees
+  - `roughness` (float = 0.6) [range 0 to 1]: How rough the bristles make the edges and ends of the strokes
+  - `waviness` (float = 0.5) [range 0 to 1]: How much the strokes wave along their way
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BrushWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BrushWipe.sksl
+- Preview: https://gl-transitions.com/editor/BrushWipe
+
+## BurnThrough
+
+The outgoing image burns away in noisy, glowing patches
+
+- Tags: burn, fire, noise
+- Parameters:
+  - `burnColor` (vec3 = vec3(1, 0.5, 0)) [color]: Color of the burning edges
+- Author: liubailin2020@gmail.com
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/BurnThrough.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/BurnThrough.sksl
+- Preview: https://gl-transitions.com/editor/BurnThrough
+
+## ButterflyWaveScrawler
+
+Wavy, color-separated ripples scramble the outgoing image into the incoming one
+
+- Tags: wave, distort, chromatic
+- Parameters:
+  - `amplitude` (float = 1)
+  - `waves` (float = 30)
+  - `colorSeparation` (float = 0.3)
+- Author: mandubian
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ButterflyWaveScrawler.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ButterflyWaveScrawler.sksl
+- Preview: https://gl-transitions.com/editor/ButterflyWaveScrawler
+
+## CameraShake
+
+The camera jolts violently in random directions, with motion blur and color fringes along each jolt; the cut happens at the peak of the shake, which then settles on the incoming image
+
+- Tags: shake, camera, motion-blur, chromatic, impact
+- Parameters:
+  - `strength` (float = 0.5) [range 0 to 1]: How far the camera jolts (and rolls) at the peak of the shake
+  - `jolts` (float = 12) [range 4 to 32]: Number of jolts over the transition
+  - `blur` (float = 0.5) [range 0 to 1]: Length of the motion blur along each jolt
+  - `split` (float = 0.5) [range 0 to 1]: How far the color channels split apart along each jolt
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CameraShake.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CameraShake.sksl
+- Preview: https://gl-transitions.com/editor/CameraShake
+
+## CardDeal
+
+The incoming image is dealt onto the frame like a hand of cards: tile after tile is flicked from below the frame, spinning through the air with a lifting shadow, and slides to a stop in its place until the picture is complete
+
+- Tags: tiles, card, rotate, shadow, 3d
+- Parameters:
+  - `grid` (ivec2 = ivec2(4, 3)): Number of cards (columns, rows), at most 6 by 6
+  - `deck` (vec2 = vec2(0.5, -0.4)): Point the cards are dealt from, can be outside the frame
+  - `spin` (float = 0.6) [range 0 to 2]: Turns a card makes on its way, before it settles straight
+  - `shadow` (float = 0.5) [range 0 to 1]: Darkness of the shadows the cards cast
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CardDeal.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CardDeal.sksl
+- Preview: https://gl-transitions.com/editor/CardDeal
+
+## CardSwipe
+
+The outgoing image is flicked off like the top card of a stack, swinging around a point below it as it flies out, while the incoming card behind it grows to fill the frame
+
+- Tags: card, swipe, stack, rotate, slide, directional
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0.25)): Direction in which the outgoing card is flicked
+  - `rotation` (float = 0.5) [range 0 to 1]: How much the outgoing card swings as it flies out
+  - `depth` (float = 0.15) [range 0 to 0.5]: How much smaller the incoming card starts
+  - `backColor` (vec4 = vec4(0.06, 0.06, 0.07, 1)) [color]: Color seen around the incoming card while it is smaller than the frame
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CardSwipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CardSwipe.sksl
+- Preview: https://gl-transitions.com/editor/CardSwipe
+
+## CellDissolve
+
+Irregular cells, like cracked mud or soap foam, switch to the incoming image one by one, with an optional bright border glowing along the cracks between them
+
+- Tags: dissolve, cells, voronoi, random
+- Parameters:
+  - `cells` (float = 8) [range 1 to 40]: Number of cells across the height of the frame
+  - `smoothness` (float = 0.1) [range 0 to 1]: Duration of each cell's switch, as a fraction of the transition (0: each cell switches at once)
+  - `border` (float = 0.006) [range 0 to 0.05]: Width of the border along the cell edges, in frame heights (0: no border)
+  - `borderColor` (vec4 = vec4(1, 0.95, 0.8, 1)) [color]: Color of the border
+  - `seed` (float = 0): Random seed: another value gives other cells, switching in another order
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CellDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CellDissolve.sksl
+- Preview: https://gl-transitions.com/editor/CellDissolve
+
+## Chessboard
+
+A chessboard pattern of squares reveals the incoming image
+
+- Tags: grid, squares, pattern
+- Parameters:
+  - `grid_num` (float = 10): Number of squares per row
+- Author: lql
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Chessboard.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Chessboard.sksl
+- Preview: https://gl-transitions.com/editor/Chessboard
+
+## CircleBurst
+
+Discs of three solid colors burst out of a point one after another, each covering the last, then a hole bursts open from the same point in the last one to reveal the incoming image
+
+- Tags: circle, burst, color, reveal, motion-graphics
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Point the discs burst out of, in texture coordinates
+  - `color1` (vec4 = vec4(0.99, 0.79, 0.29, 1)) [color]: Color of the first disc
+  - `color2` (vec4 = vec4(0.95, 0.38, 0.33, 1)) [color]: Color of the second disc
+  - `color3` (vec4 = vec4(0.13, 0.15, 0.3, 1)) [color]: Color of the third disc, which opens onto the incoming image
+  - `stagger` (float = 0.3) [range 0 to 1]: Delay between the discs, relative to the burst of one disc (at 0, they burst as one: a single circle opens onto the incoming image)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CircleBurst.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CircleBurst.sksl
+- Preview: https://gl-transitions.com/editor/CircleBurst
+
+## CircleIris
+
+The outgoing image closes into a circle over a background color, then the incoming one opens from it
+
+- Tags: circle, iris, shape
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Center of the circle
+  - `backColor` (vec4 = vec4(0.1, 0.1, 0.1, 1)) [color]: Background color
+- Author: Fernando Kuteken
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CircleIris.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CircleIris.sksl
+- Preview: https://gl-transitions.com/editor/CircleIris
+
+## CircleOpen
+
+A soft-edged circle opens from the center to reveal the incoming image
+
+- Tags: circle, iris, wipe
+- Parameters:
+  - `smoothness` (float = 0.3): Softness of the circle's edge
+  - `opening` (bool = true): Open the circle; false closes it instead
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CircleOpen.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CircleOpen.sksl
+- Preview: https://gl-transitions.com/editor/CircleOpen
+
+## ClockWipe
+
+A wipe that sweeps around the center from a starting angle
+
+- Tags: wipe, radial, clock
+- Parameters:
+  - `startingAngle` (float = 90) [range 0 to 360]: Angle where the wipe starts, in degrees
+- Author: Fernando Kuteken
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ClockWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ClockWipe.sksl
+- Preview: https://gl-transitions.com/editor/ClockWipe
+
+## Clothesline
+
+The camera pulls back to show the outgoing image as a print hung by two clothespins on a line in front of a wall, the line is pulled sideways and carries it away while the incoming print slides in, both prints swinging and tilting like hanging paper, then the camera moves back in on the incoming print until it fills the frame
+
+- Tags: 3d, perspective, slide, swing, paper, directional
+- Parameters:
+  - `direction` (float = 1): Way the line is pulled: 1 brings the incoming print in from the right, -1 from the left
+  - `sway` (float = 0.5) [range 0 to 1]: How much the prints swing and tilt as the line moves
+  - `size` (float = 0.72) [range 0.4 to 0.95]: Size of the prints when the camera is farthest, as a part of the frame
+  - `background` (vec4 = vec4(0.86, 0.84, 0.8, 1)) [color]: Color of the wall behind the line
+  - `lineColor` (vec4 = vec4(0.42, 0.34, 0.26, 1)) [color]: Color of the line
+  - `pinColor` (vec4 = vec4(0.84, 0.68, 0.47, 1)) [color]: Color of the clothespins
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Clothesline.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Clothesline.sksl
+- Preview: https://gl-transitions.com/editor/Clothesline
+
+## CodeRain
+
+The outgoing image darkens into a grid of flickering code characters tinted by its colors, then glowing streams of characters fall down the columns at their own speeds, each with a bright head and a fading tail, leaving the incoming image behind
+
+- Tags: text, digital, rain, reveal
+- Parameters:
+  - `cellSize` (float = 0.045) [range 0.02 to 0.1]: Height of a character, in frame heights
+  - `trail` (float = 0.5) [range 0.05 to 1]: Average length of the streams' fading tails, in frame heights
+  - `tint` (float = 0.5) [range 0 to 1]: How much the characters of the outgoing image take its colors, instead of the glow color
+  - `glow` (vec4 = vec4(0.2, 1, 0.4, 1)) [color]: Color of the falling streams and their glow
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CodeRain.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CodeRain.sksl
+- Preview: https://gl-transitions.com/editor/CodeRain
+
+## ColorCoords
+
+A crossfade in which the colors of one image displace the other
+
+- Tags: displace, distort, blend
+- Parameters: none
+- Author: haiyoucuv
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ColorCoords.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ColorCoords.sksl
+- Preview: https://gl-transitions.com/editor/ColorCoords
+
+## ColorDistance
+
+Pixels switch to the incoming image in order of how close their colors are
+
+- Tags: blend, color
+- Parameters:
+  - `power` (float = 5)
+- Author: P-Seebauer
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ColorDistance.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ColorDistance.sksl
+- Preview: https://gl-transitions.com/editor/ColorDistance
+
+## ColorPanelWipe
+
+Solid color panels, slightly staggered, sweep across and cover the frame, then sweep off the far side and reveal the incoming image
+
+- Tags: wipe, panels, color, slanted, motion-graphics
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0)): Direction the panels sweep toward
+  - `panels` (int = 3) [range 1 to 3 step 1]: Number of panels
+  - `color1` (vec4 = vec4(0.98, 0.76, 0.22, 1)) [color]: Color of the first panel
+  - `color2` (vec4 = vec4(0.93, 0.33, 0.36, 1)) [color]: Color of the second panel
+  - `color3` (vec4 = vec4(0.16, 0.2, 0.42, 1)) [color]: Color of the third panel
+  - `stagger` (float = 0.35) [range 0 to 1]: Delay between the panels, relative to the sweep of one panel (at 0, they move as one and only the last shows)
+  - `skew` (float = 0.25) [range -1 to 1]: Slant of the panels' edges
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ColorPanelWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ColorPanelWipe.sksl
+- Preview: https://gl-transitions.com/editor/ColorPanelWipe
+
+## ColorPhase
+
+A crossfade in which each color channel changes at a different time
+
+- Tags: fade, color
+- Parameters:
+  - `fromStep` (vec4 = vec4(0, 0.2, 0.4, 0)) [range 0 to 1]: When each channel (r, g, b, a) starts changing
+  - `toStep` (vec4 = vec4(0.6, 0.8, 1, 1)) [range 0 to 1]: When each channel (r, g, b, a) finishes changing
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ColorPhase.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ColorPhase.sksl
+- Preview: https://gl-transitions.com/editor/ColorPhase
+
+## ColorWrap
+
+Each color channel of the outgoing image is shifted and wraps around into psychedelic bands, while crossfading to the incoming image
+
+- Tags: color, glitch, psychedelic, fade
+- Parameters:
+  - `r_strength` (float = 1) [range -2 to 2]: Shift of the red channel over the transition
+  - `g_strength` (float = 1) [range -2 to 2]: Shift of the green channel over the transition
+  - `b_strength` (float = 1) [range -2 to 2]: Shift of the blue channel over the transition
+- Author: Yoni Maltsman @friendlyspinach
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ColorWrap.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ColorWrap.sksl
+- Preview: https://gl-transitions.com/editor/ColorWrap
+
+## Comb
+
+The frame is cut into interleaved strips that slide in opposite directions, each pushing the outgoing image out and the incoming one in
+
+- Tags: slide, stripes, push, horizontal
+- Parameters:
+  - `strips` (int = 10) [range 2 to 40 step 1]: Number of strips
+  - `vertical` (bool = false): Cut the frame into columns that slide up and down instead
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Comb.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Comb.sksl
+- Preview: https://gl-transitions.com/editor/Comb
+
+## ComicPanels
+
+The frame splits into slanted comic-book panels with gutters and ink borders; one after another in reading order, each panel lifts off the page with a zoom kick and a drop shadow and punches over to the incoming image, then the gutters close up over the full incoming image
+
+- Tags: comic, panels, grid, zoom
+- Parameters:
+  - `gutter` (float = 0.03) [range 0 to 0.1]: Width of the gutters between the panels, as a part of the frame's height
+  - `gutterColor` (vec4 = vec4(1, 1, 1, 1)) [color]: Color of the gutters and of the page's margin
+  - `borderColor` (vec4 = vec4(0, 0, 0, 1)) [color]: Color of the ink borders around the panels
+  - `seed` (float = 0) [range 0 to 100 step 1]: Changes the layout of the panels
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ComicPanels.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ComicPanels.sksl
+- Preview: https://gl-transitions.com/editor/ComicPanels
+
+## CrazyParametricFun
+
+The outgoing image is pulled along a parametric curve into a psychedelic swirl
+
+- Tags: distort, psychedelic
+- Parameters:
+  - `a` (float = 4)
+  - `b` (float = 1)
+  - `amplitude` (float = 120)
+  - `smoothness` (float = 0.1)
+- Author: mandubian
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CrazyParametricFun.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CrazyParametricFun.sksl
+- Preview: https://gl-transitions.com/editor/CrazyParametricFun
+
+## CrossWarp
+
+The outgoing image zooms in while the incoming one zooms out into place, sweeping from right to left
+
+- Tags: warp, zoom, horizontal
+- Parameters: none
+- Author: Eke Péter <peterekepeter@gmail.com>
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CrossWarp.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CrossWarp.sksl
+- Preview: https://gl-transitions.com/editor/CrossWarp
+
+## CrossZoom
+
+A crossfade through a strong zoom blur
+
+- Tags: zoom, blur, blend
+- Parameters:
+  - `strength` (float = 0.4) [range 0 to 1]: Blur strength
+- Author: rectalogic
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CrossZoom.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CrossZoom.sksl
+- Preview: https://gl-transitions.com/editor/CrossZoom
+
+## Crosshatch
+
+The incoming image appears through a crosshatch of lines spreading from the center
+
+- Tags: pattern, lines, noise
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Point the lines spread from
+  - `threshold` (float = 3)
+  - `fadeEdge` (float = 0.1)
+- Author: pthrasher
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Crosshatch.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Crosshatch.sksl
+- Preview: https://gl-transitions.com/editor/Crosshatch
+
+## Crumple
+
+The outgoing image crumples into a creased paper ball, shaded along its folds, which is then tossed away to reveal the incoming image
+
+- Tags: paper, 3d, shrink, shadow
+- Parameters:
+  - `creases` (int = 16) [range 1 to 32 step 1]: Number of folds creasing the paper
+  - `size` (float = 0.2) [range 0.05 to 0.4]: Radius of the paper ball, relative to the image height
+  - `direction` (vec2 = vec2(1, 0.4)): Direction the ball is tossed toward
+  - `paper` (vec4 = vec4(0.96, 0.95, 0.91, 1)) [color]: Color of the bare paper showing through the ink along the sharpest creases
+  - `shadow` (vec4 = vec4(0, 0, 0, 0.45)) [color]: Color of the shadow cast on the incoming image
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Crumple.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Crumple.sksl
+- Preview: https://gl-transitions.com/editor/Crumple
+
+## Cube
+
+The two images are faces of a box that turns a quarter turn in perspective, the outgoing face darkening as it turns away, above a reflective floor
+
+- Tags: 3d, cube, rotate, reflection
+- Parameters:
+  - `persp` (float = 0.7) [range 0 to 1]: Amount of perspective
+  - `unzoom` (float = 0.3) [range 0 to 1]: How far the camera pulls back mid-turn, as a part of the frame
+  - `reflection` (float = 0.4) [range 0 to 1]: Strength of the reflection
+  - `floating` (float = 3) [range 0 to 20]: Gap between the box and its reflection, as a percentage of the frame height
+  - `shading` (float = 0.5) [range 0 to 1]: How much the faces darken as they turn away, and the shadow on the floor
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Cube.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Cube.sksl
+- Preview: https://gl-transitions.com/editor/Cube
+
+## CurtainRise
+
+The outgoing image rises like a theater festoon curtain: cords lift its hem into scalloped swags while the fabric gathers into shaded ruffles, and it is drawn up out of the frame over the incoming image
+
+- Tags: 3d, fold, vertical
+- Parameters:
+  - `swags` (float = 3) [range 1 to 8 step 1]: Number of swags across a 16:9 frame (fewer in a portrait image)
+  - `sag` (float = 0.14) [range 0 to 0.3]: How low each swag droops between two cords, as a part of the frame's height
+  - `ruffles` (float = 14) [range 4 to 30 step 1]: Number of gathered ruffles in the fabric
+  - `shading` (float = 0.7) [range 0 to 1]: Depth of the shading on the ruffles and swags, and of the shadow under the hem
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CurtainRise.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CurtainRise.sksl
+- Preview: https://gl-transitions.com/editor/CurtainRise
+
+## Curtains
+
+The outgoing image parts in the middle like stage curtains, gathering into shaded folds as it is pulled to the sides
+
+- Tags: split, horizontal, fold, 3d
+- Parameters:
+  - `folds` (float = 7) [range 1 to 16 step 1]: Number of folds in each curtain (fewer in a portrait image)
+  - `shading` (float = 0.7) [range 0 to 1]: Depth of the shading on the folds
+  - `bunch` (float = 0.12) [range 0 to 0.4]: Width of each curtain once gathered, relative to the image width
+  - `sway` (float = 0.4) [range 0 to 1]: How much the bottom of the curtains lags behind the top
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Curtains.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Curtains.sksl
+- Preview: https://gl-transitions.com/editor/Curtains
+
+## CurvedWipe
+
+The outgoing image is pulled away by its middle: the wipe edge bulges into a smooth curve that leads the way, then flattens as it reaches the far side
+
+- Tags: wipe, curve, directional, shadow
+- Parameters:
+  - `direction` (vec2 = vec2(0, 1)): Direction the edge moves toward
+  - `curvature` (float = 0.6) [range 0 to 1]: How far the middle of the edge leads its sides
+  - `smoothness` (float = 0.02) [range 0 to 0.2]: Softness of the edge
+  - `shadow` (vec4 = vec4(0, 0, 0, 0.4)) [color]: Color of the soft shadow the lifted edge casts on the incoming image (its alpha is its strength; 0 for none)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CurvedWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CurvedWipe.sksl
+- Preview: https://gl-transitions.com/editor/CurvedWipe
+
+## CylinderRoll
+
+The frame wraps around a drum that rolls up, the outgoing image turning away over its top in a motion blur and the incoming one coming around from below and unrolling flat
+
+- Tags: 3d, roll, motion-blur, vertical, chromatic
+- Parameters:
+  - `curvature` (float = 0.8) [range 0 to 1]: How much the frame wraps around the drum
+  - `blur` (float = 0.5) [range 0 to 1]: Length of the motion blur at full speed
+  - `shading` (float = 0.6) [range 0 to 1]: How much the drum darkens as it turns away
+  - `chroma` (float = 0.5) [range 0 to 1]: Amount of RGB split along the roll, growing with speed
+  - `downward` (bool = false): Roll downward instead, the incoming image coming around from above
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/CylinderRoll.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/CylinderRoll.sksl
+- Preview: https://gl-transitions.com/editor/CylinderRoll
+
+## DefocusBlur
+
+A crossfade through an out-of-focus blur
+
+- Tags: blur, blend
+- Parameters:
+  - `blurSize` (float = 0.02): Amount of blur
+- Author: Sergey Kosarevsky
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DefocusBlur.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DefocusBlur.sksl
+- Preview: https://gl-transitions.com/editor/DefocusBlur
+
+## DiamondWipe
+
+A soft-edged diamond grows from the center to reveal the incoming image
+
+- Tags: shape, wipe, iris
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Center of the diamond
+  - `smoothness` (float = 0.03) [range 0 to 0.5]: Softness of the diamond's edge
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DiamondWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DiamondWipe.sksl
+- Preview: https://gl-transitions.com/editor/DiamondWipe
+
+## Directional
+
+The incoming image pushes the outgoing one out in a given direction
+
+- Tags: slide, push, directional
+- Parameters:
+  - `direction` (vec2 = vec2(0, 1)): Direction of the movement
+- Author: Gaëtan Renaudeau
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Directional.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Directional.sksl
+- Preview: https://gl-transitions.com/editor/Directional
+
+## DirectionalEased
+
+Like Directional, with an eased movement
+
+- Tags: slide, push, directional
+- Parameters:
+  - `direction` (vec2 = vec2(0, 1)): Direction of the movement
+- Author: Max Plotnikov
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DirectionalEased.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DirectionalEased.sksl
+- Preview: https://gl-transitions.com/editor/DirectionalEased
+
+## DirectionalScaled
+
+Like Directional, with both images scaled down while they slide
+
+- Tags: slide, push, zoom, directional
+- Parameters:
+  - `direction` (vec2 = vec2(0, 1)): Direction of the movement
+  - `scale` (float = 0.7)
+- Author: Thibaut Foussard
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DirectionalScaled.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DirectionalScaled.sksl
+- Preview: https://gl-transitions.com/editor/DirectionalScaled
+
+## DirectionalWarp
+
+A diagonal wipe with a warped, smeared edge
+
+- Tags: wipe, warp, directional
+- Parameters:
+  - `smoothness` (float = 0.1): Softness of the edge
+  - `direction` (vec2 = vec2(-1, 1)): Direction of the wipe
+- Author: pschroen
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DirectionalWarp.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DirectionalWarp.sksl
+- Preview: https://gl-transitions.com/editor/DirectionalWarp
+
+## DirectionalWipe
+
+A straight wipe in any direction, diagonal and soft-edged by default; a smoothness of 0 gives a hard edge
+
+- Tags: wipe, directional
+- Parameters:
+  - `direction` (vec2 = vec2(1, -1)): Direction of the wipe
+  - `smoothness` (float = 0.5): Softness of the edge
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DirectionalWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DirectionalWipe.sksl
+- Preview: https://gl-transitions.com/editor/DirectionalWipe
+
+## Disintegrate
+
+The outgoing image crumbles into fine dust from one side, its grains blown away by the wind and fading out, revealing the incoming image underneath
+
+- Tags: particles, dust, wind, directional
+- Parameters:
+  - `particleSize` (float = 0.008) [range 0.0075 to 0.03]: Size of the dust grains, in frame heights
+  - `direction` (vec2 = vec2(1, -0.15)): Direction in which the wind blows the dust
+  - `spread` (float = 0.75) [range 0 to 1]: How far the dust flies and scatters before it fades out
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Disintegrate.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Disintegrate.sksl
+- Preview: https://gl-transitions.com/editor/Disintegrate
+
+## DisplacementMap
+
+A crossfade in which a displacement map (an extra grayscale texture) warps both images
+
+- Tags: displace, distort, blend
+- Parameters:
+  - `strength` (float = 0.5): Strength of the displacement
+- Extra textures: `displacementMap` (sampler2D)
+- Author: Travis Fischer
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DisplacementMap.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DisplacementMap.sksl
+- Preview: https://gl-transitions.com/editor/DisplacementMap
+
+## DitherDissolve
+
+The incoming image appears through a regular 8x8 ordered dither pattern, like a retro computer screen
+
+- Tags: dissolve, pattern, retro, pixelate
+- Parameters:
+  - `dotSize` (float = 0.02) [range 0.002 to 0.05]: Size of a dither dot, relative to the height
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DitherDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DitherDissolve.sksl
+- Preview: https://gl-transitions.com/editor/DitherDissolve
+
+## DominoFall
+
+The outgoing image is cut into standing slats that topple backward like dominoes in a chain reaction across the frame, each one leaning onto the next and knocking it over, until they all lie flat and reveal the incoming image
+
+- Tags: 3d, stripes, rotate
+- Parameters:
+  - `count` (int = 12) [range 2 to 40 step 1]: Number of slats
+  - `reverse` (bool = false): The chain runs from right to left instead of left to right
+  - `knock` (float = 0.2) [range 0.05 to 1]: Part of a slat's fall after which it knocks the next one: lower runs the chain faster, with more slats falling at once
+  - `lean` (float = 0.8) [range 0 to 1]: How far each slat's top leans sideways onto the next one, as a part of a slat's width
+  - `perspective` (float = 0.8) [range 0 to 1]: Strength of the perspective
+  - `shading` (float = 0.6) [range 0 to 1]: How much the slats darken as they fall, and the shadows they cast
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DominoFall.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DominoFall.sksl
+- Preview: https://gl-transitions.com/editor/DominoFall
+
+## DoomMelt
+
+The outgoing image melts down in uneven columns, like the Doom screen wipe
+
+- Tags: melt, columns, retro
+- Parameters:
+  - `bars` (int = 30)
+  - `amplitude` (float = 2)
+  - `noise` (float = 0.1)
+  - `frequency` (float = 0.5)
+  - `dripScale` (float = 0.5)
+- Author: Zeh Fernando
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DoomMelt.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DoomMelt.sksl
+- Preview: https://gl-transitions.com/editor/DoomMelt
+
+## Doorway
+
+The outgoing image opens like double doors swinging toward the viewer, as the incoming one comes forward from the dark room behind, with a floor reflection
+
+- Tags: doors, 3d, reflection
+- Parameters:
+  - `reflection` (float = 0.4) [range 0 to 1]: Strength of the floor reflection under the incoming image
+  - `perspective` (float = 0.4) [range 0 to 1]: Amount of perspective on the swinging doors
+  - `depth` (float = 3) [range 1 to 10]: How far back the incoming image starts (1: no distance)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Doorway.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Doorway.sksl
+- Preview: https://gl-transitions.com/editor/Doorway
+
+## Drape
+
+The outgoing image hangs like a sheet of fabric that is let go at the top: it collapses into soft, uneven folds that hide one another as the cloth bunches up and slides down out of the frame, revealing the incoming image behind it
+
+- Tags: fabric, fold, vertical, 3d, shadow
+- Parameters:
+  - `folds` (float = 6) [range 1 to 16 step 1]: Number of folds across the cloth (fewer in a portrait image)
+  - `depth` (float = 0.7) [range 0 to 1]: Depth of the folds and of their shading
+  - `sway` (float = 0.4) [range 0 to 1]: How much the cloth sways sideways as it falls
+  - `shadow` (float = 0.5) [range 0 to 1]: Strength of the soft shadow cast by the cloth on the incoming image
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Drape.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Drape.sksl
+- Preview: https://gl-transitions.com/editor/Drape
+
+## Dreamy
+
+A crossfade with a gentle wavy distortion
+
+- Tags: wave, blend
+- Parameters: none
+- Author: mikolalysenko
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Dreamy.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Dreamy.sksl
+- Preview: https://gl-transitions.com/editor/Dreamy
+
+## DreamyZoom
+
+Zooms and rotates into a bright flash, then out to the incoming image
+
+- Tags: zoom, rotate, flash
+- Parameters:
+  - `rotation` (float = 6)
+  - `scale` (float = 1.2)
+- Author: Zeh Fernando
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DreamyZoom.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DreamyZoom.sksl
+- Preview: https://gl-transitions.com/editor/DreamyZoom
+
+## DuotoneFade
+
+The outgoing image is printed in two inks, shadows first, as a bold high-contrast duotone; the incoming image is printed over it in the same two inks, its dark tones landing before its highlights, then its own colors come back, highlights first
+
+- Tags: color, duotone, print, poster, gradient-map, luminance
+- Parameters:
+  - `shadowInk` (vec4 = vec4(0.11, 0.09, 0.46, 1)) [color]: Ink printed in the shadows (its alpha is its strength)
+  - `highlightInk` (vec4 = vec4(1, 0.45, 0.62, 1)) [color]: Ink printed in the highlights (its alpha is its strength)
+  - `contrast` (float = 0.6) [range 0 to 1]: How hard the tones are pushed apart toward the two inks
+  - `grain` (float = 0.4) [range 0 to 1]: Amount of print grain in the inks and along the handoff
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/DuotoneFade.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/DuotoneFade.sksl
+- Preview: https://gl-transitions.com/editor/DuotoneFade
+
+## EchoSlide
+
+The outgoing image slides away leaving a trail of discrete fading copies of itself, a stroboscopic echo, and the incoming image's echoes converge into place
+
+- Tags: slide, echo, strobe, directional
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0)): Direction in which the images slide
+  - `echoes` (int = 4) [range 1 to 7 step 1]: Number of echoes between the two images
+  - `trail` (float = 0.25) [range 0.05 to 0.6]: How long the echoes trail behind each image, as a part of the transition
+  - `decay` (float = 0.5) [range 0 to 1]: How fast the echoes of the outgoing image fade out into those of the incoming one
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/EchoSlide.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/EchoSlide.sksl
+- Preview: https://gl-transitions.com/editor/EchoSlide
+
+## EdgeGlow
+
+Both images fade through black with their edges glowing
+
+- Tags: edges, fade
+- Parameters:
+  - `edge_thickness` (float = 0.001)
+  - `edge_brightness` (float = 8)
+- Author: Woohyun Kim
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/EdgeGlow.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/EdgeGlow.sksl
+- Preview: https://gl-transitions.com/editor/EdgeGlow
+
+## EyeBlink
+
+Curved eyelids close from the top and bottom over the outgoing image, which blurs and dims, then open on the incoming image as it comes back into focus, as if the viewer blinked
+
+- Tags: blink, eye, blur, shape
+- Parameters:
+  - `blur` (float = 0.5) [range 0 to 1]: How much the image blurs and dims while the eyes are closed
+  - `softness` (float = 0.12) [range 0.01 to 0.3]: Width of the soft shadow along the rim of the eyelids
+  - `blinks` (int = 1) [range 1 to 2 step 1]: Number of blinks: 1, or 2 for a quick double blink (the cut happens on the first one)
+  - `color` (vec4 = vec4(0.03, 0.02, 0.02, 1)) [color]: Color of the eyelids
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/EyeBlink.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/EyeBlink.sksl
+- Preview: https://gl-transitions.com/editor/EyeBlink
+
+## FacetedGlass
+
+The frame is seen through a pane of irregular cut-glass facets, each one showing its own shifted, zoomed and tilted view of the image, with bright beveled edges and thin dark seams; the facets turn to the incoming image one by one, then the glass flattens out and clears
+
+- Tags: glass, refraction, facets, voronoi, distortion
+- Parameters:
+  - `facets` (float = 5) [range 2 to 20]: Number of facets across the height of the frame
+  - `refraction` (float = 0.1) [range 0 to 0.3]: How far each facet shifts its view of the image at the peak
+  - `bevel` (float = 0.6) [range 0 to 1]: Strength of the highlights and shadows along the beveled edges, and of the glint as each facet turns
+  - `highlight` (vec4 = vec4(1, 0.98, 0.92, 1)) [color]: Color of the light caught by the bevels
+  - `seed` (float = 0): Random seed: another value gives other facets, turning in another order
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FacetedGlass.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FacetedGlass.sksl
+- Preview: https://gl-transitions.com/editor/FacetedGlass
+
+## Fade
+
+A linear crossfade between the two images
+
+- Tags: fade, blend
+- Parameters: none
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Fade.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Fade.sksl
+- Preview: https://gl-transitions.com/editor/Fade
+
+## FadeColor
+
+A fade through a solid color, black by default
+
+- Tags: fade, color
+- Parameters:
+  - `color` (vec4 = vec4(0, 0, 0, 1)) [color]: Color to fade through
+  - `colorPhase` (float = 0.4) [range 0 to 1]: How long the color shows in the middle
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FadeColor.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FadeColor.sksl
+- Preview: https://gl-transitions.com/editor/FadeColor
+
+## FadeGrayscale
+
+A crossfade through grayscale
+
+- Tags: fade, grayscale, color
+- Parameters:
+  - `intensity` (float = 0.3) [range 0 to 1]: How long the grayscale phase lasts
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FadeGrayscale.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FadeGrayscale.sksl
+- Preview: https://gl-transitions.com/editor/FadeGrayscale
+
+## FallOver
+
+The outgoing image falls over backward, hinged on its bottom edge, revealing the incoming one behind it
+
+- Tags: rotate, vertical, 3d
+- Parameters:
+  - `perspective` (float = 0.8) [range 0 to 1]: Strength of the perspective
+  - `shading` (float = 0.7) [range 0 to 1]: How much the image darkens as it falls
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FallOver.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FallOver.sksl
+- Preview: https://gl-transitions.com/editor/FallOver
+
+## FilmBurn
+
+Glowing film-burn light leaks wash over the image and reveal the incoming one
+
+- Tags: burn, film, light-leak
+- Parameters:
+  - `Seed` (float = 2.31): Random seed
+- Author: Anastasia Dunbar
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FilmBurn.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FilmBurn.sksl
+- Preview: https://gl-transitions.com/editor/FilmBurn
+
+## FilmDissolve
+
+A cross-dissolve blended in linear light, as light adds up on film: the frame keeps its brightness all the way through and the highlights of each image shine through the other
+
+- Tags: dissolve, fade, blend, light
+- Parameters:
+  - `overlap` (float = 0.25) [range 0 to 1]: Extra light where the two images overlap at mid-dissolve, softly rolled off so it never clips
+  - `smoothness` (float = 0.5) [range 0 to 1]: Easing of the dissolve: 0 is linear, 1 eases in and out
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FilmDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FilmDissolve.sksl
+- Preview: https://gl-transitions.com/editor/FilmDissolve
+
+## FilmStrip
+
+The picture slips like film in a projector gate: it shrinks to show the sprocket holes, the strip runs down with motion blur and a slight weave, then the incoming frame lands in place
+
+- Tags: retro, vertical, motion-blur, film
+- Parameters:
+  - `frames` (int = 2) [range 1 to 6 step 1]: Number of frames that slip by
+  - `shrink` (float = 0.2) [range 0 to 0.4]: How much the picture shrinks during the slip, showing the film's edges
+  - `blur` (float = 0.5) [range 0 to 1]: Length of the motion blur at full speed
+  - `weave` (float = 0.5) [range 0 to 1]: Amount of horizontal weave and vertical jitter
+  - `filmColor` (vec4 = vec4(0.06, 0.05, 0.05, 1)) [color]: Color of the film around the pictures and of the line between frames
+  - `holeColor` (vec4 = vec4(0.96, 0.93, 0.85, 1)) [color]: Color of the light through the sprocket holes
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FilmStrip.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FilmStrip.sksl
+- Preview: https://gl-transitions.com/editor/FilmStrip
+
+## Fisheye
+
+The outgoing image bulges toward the viewer through a strong fisheye lens, then the incoming one flattens back into place
+
+- Tags: lens, distort, zoom, blend
+- Parameters:
+  - `strength` (float = 0.8) [range 0 to 1]: Strength of the lens at its peak
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Fisheye.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Fisheye.sksl
+- Preview: https://gl-transitions.com/editor/Fisheye
+
+## FlameWipe
+
+A wall of flames sweeps across the frame, scorching the outgoing image ahead of it and leaving the incoming image under a fading warm glow
+
+- Tags: fire, flame, burn, wipe, directional
+- Parameters:
+  - `direction` (vec2 = vec2(0, 1)): Direction in which the flames sweep across the frame
+  - `height` (float = 0.4) [range 0 to 1]: Height of the flames, as a fraction of the frame height
+  - `scorch` (float = 0.7) [range 0 to 1]: How much the outgoing image browns and chars ahead of the flames
+  - `glow` (float = 0.6) [range 0 to 1]: Strength of the warm glow left on the incoming image
+  - `color` (vec3 = vec3(1, 0.4, 0.08)) [color]: Tint of the body of the flames
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FlameWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FlameWipe.sksl
+- Preview: https://gl-transitions.com/editor/FlameWipe
+
+## FlashFade
+
+A crossfade that brightens toward a color in the middle
+
+- Tags: fade, color, flash
+- Parameters:
+  - `color` (vec3 = vec3(0.9, 0.4, 0.2)) [color]: Color the images brighten toward
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FlashFade.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FlashFade.sksl
+- Preview: https://gl-transitions.com/editor/FlashFade
+
+## FlowerWipe
+
+A flower shape with several petals grows to reveal the incoming image
+
+- Tags: shape, wipe, polar
+- Parameters:
+  - `segments` (int = 5): Number of petals
+- Author: Fernando Kuteken
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FlowerWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FlowerWipe.sksl
+- Preview: https://gl-transitions.com/editor/FlowerWipe
+
+## FlyEye
+
+The image breaks into a fly's-eye grid of lenses with color separation
+
+- Tags: lens, distort, chromatic
+- Parameters:
+  - `size` (float = 0.04)
+  - `zoom` (float = 50)
+  - `colorSeparation` (float = 0.3)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FlyEye.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FlyEye.sksl
+- Preview: https://gl-transitions.com/editor/FlyEye
+
+## Fold
+
+The incoming image unfolds from the left while the outgoing one folds away to the right
+
+- Tags: fold, slide, horizontal
+- Parameters: none
+- Author: nwoeanhinnogaehr
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Fold.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Fold.sksl
+- Preview: https://gl-transitions.com/editor/Fold
+
+## FrostWipe
+
+Ice crystals grow in from the edges of the frame with feathery, branching fronts, frosting the outgoing image white and blurry until it is covered, then thaw back out to the edges on the incoming image
+
+- Tags: frost, ice, crystal, blur, cover
+- Parameters:
+  - `spread` (float = 0.5) [range 0 to 1]: How far the crystal fingers reach ahead of the frost
+  - `scale` (float = 5) [range 2 to 12]: Size of the crystals: more, smaller ones with a larger value
+  - `blur` (float = 0.5) [range 0 to 1]: How much the frost blurs the image under it
+  - `color` (vec4 = vec4(0.86, 0.93, 1, 1)) [color]: Color of the frost
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/FrostWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/FrostWipe.sksl
+- Preview: https://gl-transitions.com/editor/FrostWipe
+
+## Funnel
+
+The outgoing image narrows into a curved funnel toward a point on the bottom edge and slides into it, its sides bending like a window minimized into a dock, revealing the incoming image behind it
+
+- Tags: distort, slide, vertical, shadow
+- Parameters:
+  - `target` (float = 0.7) [range 0 to 1]: Point of the bottom edge where the image disappears, from left (0) to right (1)
+  - `curvature` (float = 0.8) [range 0 to 1]: Shape of the funnel's sides: 0 straight, 1 bent into an S curve
+  - `shadow` (float = 0.5) [range 0 to 1]: Strength of the shading of the bent image and of the shadow it casts
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Funnel.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Funnel.sksl
+- Preview: https://gl-transitions.com/editor/Funnel
+
+## Gallery
+
+The camera pulls back from the outgoing image to show it as a slide hanging in a row on a wall in perspective, the row glides along as each slide turns away from the center, and the camera moves back in on the incoming slide until it fills the frame
+
+- Tags: 3d, perspective, gallery, slide, reflection, directional
+- Parameters:
+  - `direction` (float = 1): Way the row moves: 1 brings the incoming slide in from the right, -1 from the left
+  - `tilt` (float = 0.6) [range 0 to 1]: How much the slides turn as they leave the center
+  - `gap` (float = 0.15) [range 0 to 1]: Space between two slides, in slide widths
+  - `zoom` (float = 2) [range 0.2 to 3]: How far the camera pulls back
+  - `reflection` (float = 0.3) [range 0 to 1]: Strength of the reflection of the slides on the floor
+  - `background` (vec4 = vec4(0.07, 0.07, 0.08, 1)) [color]: Color of the wall and the floor around the slides
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Gallery.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Gallery.sksl
+- Preview: https://gl-transitions.com/editor/Gallery
+
+## GeometricCollage
+
+The incoming image arrives cut into a geometric poster of quarter discs, half discs, triangles and their complements: piece after piece swings in around a corner of its cell, a flat plate of color just ahead of it, and lands flat with a soft paper shadow
+
+- Tags: geometric, shapes, collage, rotate, color
+- Parameters:
+  - `cells` (int = 2) [range 1 to 5 step 1]: Number of cells along the short side of the frame, the long side gets as many as keep them about square
+  - `stagger` (float = 1) [range 0 to 1]: How spread out in time the pieces arrive: 0 swings them all in together, 1 lands them one after another
+  - `plates` (bool = true): Show a flat plate of color swinging in just ahead of each piece
+  - `color1` (vec4 = vec4(0.89, 0.22, 0.17, 1)) [color]: First plate color
+  - `color2` (vec4 = vec4(0.97, 0.77, 0.15, 1)) [color]: Second plate color
+  - `color3` (vec4 = vec4(0.14, 0.32, 0.66, 1)) [color]: Third plate color
+  - `shadow` (float = 0.6) [range 0 to 1]: Darkness of the shadows the pieces cast while they swing in
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GeometricCollage.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GeometricCollage.sksl
+- Preview: https://gl-transitions.com/editor/GeometricCollage
+
+## GlintDissolve
+
+The bright points of the outgoing image sparkle into crisp four-point star glints that swell and twinkle up to the cut, then shrink back into the highlights of the incoming image, which stays sharp
+
+- Tags: light, glints, sparkle, dissolve
+- Parameters:
+  - `size` (float = 0.15) [range 0.02 to 0.3]: Length of the longest rays of the glints at the peak, in frame heights
+  - `threshold` (float = 0.6) [range 0 to 1]: Brightness above which the image sparkles
+  - `intensity` (float = 2) [range 0 to 4]: Brightness of the glints
+  - `diagonals` (bool = false): Add a shorter, softer pair of diagonal rays to each glint
+  - `rotation` (float = 0) [range -45 to 45]: Angle of the cross, in degrees
+  - `rainbow` (float = 0.35) [range 0 to 1]: Rainbow fringes along the rays
+  - `tint` (vec3 = vec3(1, 0.95, 0.85)) [color]: Tint of the glints, added as light
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GlintDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GlintDissolve.sksl
+- Preview: https://gl-transitions.com/editor/GlintDissolve
+
+## GlitchBands
+
+A crossfade with glitchy horizontal bands and color shifts
+
+- Tags: glitch, blend
+- Parameters:
+  - `ampx` (float = 1): Horizontal amplitude of the glitch
+  - `ampy` (float = 1): Vertical amplitude of the glitch
+- Author: Yoni Maltsman @friendlyspinach
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GlitchBands.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GlitchBands.sksl
+- Preview: https://gl-transitions.com/editor/GlitchBands
+
+## GlitchDisplace
+
+Blocks of the image are displaced in a glitch that flashes into the incoming image
+
+- Tags: glitch, displace
+- Parameters: none
+- Author: Matt DesLauriers
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GlitchDisplace.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GlitchDisplace.sksl
+- Preview: https://gl-transitions.com/editor/GlitchDisplace
+
+## GlitchFlicker
+
+A flickering glitch with RGB offset, ghosting and scanlines that flashes back to the outgoing image
+
+- Tags: glitch, flicker, chromatic, scanlines
+- Parameters:
+  - `frameRate` (float = 24)
+  - `rgbOffset` (float = 0.014)
+  - `blockAmount` (float = 0.72)
+  - `ghostAmount` (float = 0.62)
+  - `redCyan` (float = 0.58)
+  - `scanline` (float = 0.075)
+- Author: bread
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GlitchFlicker.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GlitchFlicker.sksl
+- Preview: https://gl-transitions.com/editor/GlitchFlicker
+
+## GlitchMemories
+
+A crossfade with glitchy, color-shifted blocks
+
+- Tags: glitch, chromatic, blend
+- Parameters: none
+- Author: Gunnar Roth
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GlitchMemories.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GlitchMemories.sksl
+- Preview: https://gl-transitions.com/editor/GlitchMemories
+
+## GlitterDissolve
+
+The image becomes a shimmering field of tiny diamond sequins that flip over in 3D at random moments, each lifting and tilting on its own axis and flashing a glint of light, and land on the incoming image
+
+- Tags: tiles, flip, 3d, sparkle, dissolve
+- Parameters:
+  - `tiles` (float = 20) [range 6 to 60]: Number of tiles stacked across the height of the frame
+  - `hexagons` (bool = false): Hexagonal tiles instead of diamonds
+  - `sparkle` (float = 1) [range 0 to 2]: Strength of the glints the tiles catch as they turn
+  - `glint` (vec3 = vec3(1, 0.97, 0.9)) [color]: Color of the glints, added as light
+  - `seed` (float = 0) [range 0 to 100]: Changes the order and the axes of the flips (whole numbers)
+  - `backColor` (vec4 = vec4(0.04, 0.04, 0.05, 1)) [color]: Color seen behind a tile while it is edge-on
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GlitterDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GlitterDissolve.sksl
+- Preview: https://gl-transitions.com/editor/GlitterDissolve
+
+## GlowDissolve
+
+The incoming image spreads over the outgoing one with a hot, glowing edge
+
+- Tags: dissolve, burn, glow
+- Parameters:
+  - `uLineWidth` (float = 0.1)
+  - `uSpreadClr` (vec3 = vec3(1, 0, 0)) [color]: Color of the spreading edge
+  - `uHotClr` (vec3 = vec3(0.9, 0.9, 0.2)) [color]: Color of the hottest part of the edge
+  - `uPow` (float = 5)
+  - `uIntensity` (float = 1)
+- Author: hjm1fb
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GlowDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GlowDissolve.sksl
+- Preview: https://gl-transitions.com/editor/GlowDissolve
+
+## GooeyWipe
+
+Soft, glossy blobs of liquid pop up over the outgoing image, swell and melt into each other, revealing the incoming image until they cover the whole frame
+
+- Tags: blob, liquid, organic, reveal
+- Parameters:
+  - `blobs` (float = 5) [range 2 to 12 step 1]: Number of blobs across the frame
+  - `smoothness` (float = 0.5) [range 0 to 1]: How smoothly neighbouring blobs melt into each other
+  - `highlight` (vec4 = vec4(1, 1, 1, 0.7)) [color]: Color of the glossy highlight on the rim of the blobs (its alpha is its strength)
+  - `shadow` (vec4 = vec4(0, 0, 0, 0.3)) [color]: Color of the soft shadow that the blobs cast on the outgoing image
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GooeyWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GooeyWipe.sksl
+- Preview: https://gl-transitions.com/editor/GooeyWipe
+
+## GravityLens
+
+A black disk appears and grows, bending the outgoing image around it like a heavy mass bends light: the image is stretched into a bright ring at the disk's edge and swallowed until the frame is black, then the disk shrinks back, unbending the incoming image
+
+- Tags: distort, lens, space, circular, dark
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5))
+  - `strength` (float = 0.6) [range 0 to 1.5]: How strongly the light bends: radius of the lensed ring beyond the disk's edge, in disk radii
+  - `glow` (float = 0.6) [range 0 to 1]: Brightness of the lensed ring and of the thin ring of light hugging the disk's edge
+  - `hole` (vec4 = vec4(0, 0, 0, 1)) [color]: Color of the disk
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GravityLens.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GravityLens.sksl
+- Preview: https://gl-transitions.com/editor/GravityLens
+
+## GridFlip
+
+The image splits into a grid of cards that lift apart and turn over in perspective one after another, each one showing its part of the incoming image on its back
+
+- Tags: grid, tiles, flip, 3d
+- Parameters:
+  - `size` (ivec2 = ivec2(4, 4)): Number of tiles (columns, rows)
+  - `pause` (float = 0.1) [range 0 to 0.4]: Part of the transition at the start and at the end during which the gaps between the tiles open and close
+  - `dividerWidth` (float = 0.05) [range 0 to 0.4]: Width of the gaps between the tiles, as a part of a tile's shorter side
+  - `bgcolor` (vec4 = vec4(0, 0, 0, 1)) [color]: Color behind the tiles
+  - `randomness` (float = 0.1) [range 0 to 1]: How much the order of the flips is shuffled, from a diagonal wave across the grid to random
+- Author: TimDonselaar
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/GridFlip.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/GridFlip.sksl
+- Preview: https://gl-transitions.com/editor/GridFlip
+
+## Halftone
+
+The image breaks into printed halftone dots whose size follows its shades, the dots reshape into the incoming image, then merge back into it
+
+- Tags: dots, pattern, retro
+- Parameters:
+  - `dots` (float = 28) [range 4 to 80]: Number of dots across the shorter side
+  - `angle` (float = 45) [range 0 to 90]: Angle of the dot grid, in degrees
+  - `paper` (vec4 = vec4(1, 1, 1, 1)) [color]: Color of the paper between the dots
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Halftone.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Halftone.sksl
+- Preview: https://gl-transitions.com/editor/Halftone
+
+## HeartWipe
+
+A heart grows from the center with a little heartbeat to reveal the incoming image
+
+- Tags: shape, wipe, heart
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Center of the heart
+  - `smoothness` (float = 0.006) [range 0 to 0.1]: Softness of the heart's edge
+  - `pulse` (float = 0.5) [range 0 to 1]: Strength of the heartbeat throb as the heart grows
+  - `glowColor` (vec3 = vec3(1, 0.85, 0.9)) [color]: Color of the soft light glowing along the heart's edge
+  - `glow` (float = 0.3) [range 0 to 1]: Strength of the glow (0 for a clean edge)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/HeartWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/HeartWipe.sksl
+- Preview: https://gl-transitions.com/editor/HeartWipe
+
+## HeatHaze
+
+Shimmering heat waves rise through the frame, strongest at the bottom, making the outgoing image wobble like the air over hot asphalt; the incoming image shows through the haze and settles as it calms
+
+- Tags: distort, heat, shimmer, noise, organic, blend
+- Parameters:
+  - `strength` (float = 0.04) [range 0 to 0.1]: How far the haze bends the image, in frame heights (the strongest waves bend it about 1.5 times as far)
+  - `scale` (float = 6) [range 1 to 12]: Size of the heat waves: more, smaller ones with a larger value
+  - `speed` (float = 2) [range 0 to 6]: How fast the heat waves rise
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/HeatHaze.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/HeatHaze.sksl
+- Preview: https://gl-transitions.com/editor/HeatHaze
+
+## Hexagonalize
+
+Both images turn into hexagons, crossfade, then sharpen again
+
+- Tags: pixelate, hexagon, blend
+- Parameters:
+  - `steps` (int = 50)
+  - `horizontalHexagons` (float = 20): Number of hexagons across
+- Author: Fernando Kuteken
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Hexagonalize.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Hexagonalize.sksl
+- Preview: https://gl-transitions.com/editor/Hexagonalize
+
+## HingedSquares
+
+The image is cut into squares that turn in alternate directions while staying hinged at their corners, so the sheet opens into a checkerboard of diamonds showing the incoming image; those diamonds then turn back into place and close the sheet
+
+- Tags: grid, tiles, geometric, rotate
+- Parameters:
+  - `cells` (int = 5) [range 1 to 20 step 1]: Number of squares across the height of the frame
+  - `shading` (float = 0.6) [range 0 to 1]: Strength of the bevel on the turning squares and of the soft shadow they cast into the gaps
+  - `zoom` (float = 0.5) [range 0 to 1]: How much the view zooms out to keep the opening sheet in frame (0: the sheet grows past the frame edges)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/HingedSquares.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/HingedSquares.sksl
+- Preview: https://gl-transitions.com/editor/HingedSquares
+
+## Hologram
+
+The outgoing image turns into a flickering hologram (blue by default) with scanlines and jittering rows, breaks up, and the hologram resolves into the incoming image in full color
+
+- Tags: hologram, sci-fi, scanlines, flicker, glitch
+- Parameters:
+  - `tint` (vec3 = vec3(0.2, 0.75, 1)) [color]: Color of the hologram
+  - `background` (vec4 = vec4(0, 0.02, 0.05, 1)) [color]: Color behind the hologram, seen between its scanlines and where it breaks up
+  - `scanlines` (float = 150) [range 20 to 300]: Number of scanlines over the frame height
+  - `jitter` (float = 0.04) [range 0 to 0.2]: How far rows of the hologram jump sideways, relative to the frame width
+  - `flicker` (float = 0.6) [range 0 to 1]: Strength of the flicker and of the rows that drop out
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Hologram.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Hologram.sksl
+- Preview: https://gl-transitions.com/editor/Hologram
+
+## Honeycomb
+
+The image splits into hexagons that spin and shrink away in a wave from the center, uncovering the incoming image
+
+- Tags: hexagon, tiles, rotate, radial
+- Parameters:
+  - `size` (float = 6) [range 2 to 30]: Number of hexagons across the shorter side
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Honeycomb.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Honeycomb.sksl
+- Preview: https://gl-transitions.com/editor/Honeycomb
+
+## HorizontalClose
+
+The incoming image closes in from the top and bottom edges toward the middle
+
+- Tags: wipe, split
+- Parameters: none
+- Author: martiniti
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/HorizontalClose.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/HorizontalClose.sksl
+- Preview: https://gl-transitions.com/editor/HorizontalClose
+
+## HorizontalHold
+
+The picture loses its horizontal hold like an old TV: it shears into diagonal bands that slide sideways and wrap around, separated by a slanted blanking bar that carries the incoming image in, then the shear straightens, wobbles and locks
+
+- Tags: retro, horizontal, shear, scanlines
+- Parameters:
+  - `slips` (int = 3) [range 2 to 6 step 1]: Number of times the picture slips sideways before it locks
+  - `shear` (float = 1.25) [range 0 to 4]: How far the lines lag from top to bottom at the worst of the tearing, in picture widths
+  - `barWidth` (float = 0.14) [range 0 to 0.5]: Width of the blanking bar between the copies of the picture
+  - `barColor` (vec4 = vec4(0.02, 0.02, 0.03, 1)) [color]: Color of the blanking bar
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/HorizontalHold.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/HorizontalHold.sksl
+- Preview: https://gl-transitions.com/editor/HorizontalHold
+
+## HorizontalOpen
+
+The incoming image opens from a line in the middle toward the top and bottom edges
+
+- Tags: wipe, split
+- Parameters: none
+- Author: martiniti
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/HorizontalOpen.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/HorizontalOpen.sksl
+- Preview: https://gl-transitions.com/editor/HorizontalOpen
+
+## HsvFade
+
+A crossfade through the HSV color space that cycles through hues
+
+- Tags: fade, color, hue
+- Parameters: none
+- Author: nwoeanhinnogaehr
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/HsvFade.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/HsvFade.sksl
+- Preview: https://gl-transitions.com/editor/HsvFade
+
+## InkBleed
+
+The incoming image spreads over the outgoing one like drops of ink in water, blooming from a few points with curling, wispy edges and a darker rim, until it fills the frame
+
+- Tags: ink, organic, fluid, noise
+- Parameters:
+  - `drops` (float = 4) [range 1 to 8 step 1]: Number of ink drops
+  - `tendrils` (float = 0.7) [range 0 to 1]: How far the curling tendrils reach out of the blooms
+  - `rim` (float = 0.5) [range 0 to 1]: How dark the rim of ink at the front of the blooms is
+  - `seed` (float = 3): Random seed for the drop positions and the swirls
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/InkBleed.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/InkBleed.sksl
+- Preview: https://gl-transitions.com/editor/InkBleed
+
+## InsetWipe
+
+A rectangle anchored in a corner, on an edge or in the center grows until the incoming image fills the frame, revealing it in place without scaling it; in reverse, the outgoing image shrinks into the rectangle
+
+- Tags: wipe, shape, box
+- Parameters:
+  - `anchor` (vec2 = vec2(1, 1)): Where the rectangle grows from: (0, 0) bottom left, (1, 1) top right, (0.5, 0) middle of the bottom edge, (0.5, 0.5) center
+  - `smoothness` (float = 0) [range 0 to 0.2]: Softness of the rectangle's edge
+  - `borderWidth` (float = 0) [range 0 to 0.1]: Width of a border drawn around the rectangle, in frame heights (0: no border)
+  - `borderColor` (vec4 = vec4(1, 1, 1, 1)) [color]: Color of the border
+  - `reverse` (bool = false): The outgoing image shrinks into the rectangle instead, toward the anchor
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/InsetWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/InsetWipe.sksl
+- Preview: https://gl-transitions.com/editor/InsetWipe
+
+## InsideCube
+
+The camera stands inside a cube: the outgoing image covers the wall in front of it and the view turns toward the next inner wall, so the outgoing image swings away in perspective as the incoming one turns into view, the walls darkening into the shaded inner corner between them
+
+- Tags: 3d, cube, rotate, perspective, directional
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0)): Direction the view turns toward, snapped to its main axis (left, right, up or down): the incoming image is on the wall on that side
+  - `fov` (float = 90) [range 60 to 120]: Field of view along the turn, in degrees: at 90 the camera stays at the center of the cube, a wider view makes the walls recede more
+  - `shading` (float = 0.6) [range 0 to 1]: How much the walls darken as they turn away, and the shadow in the inner corners of the cube
+  - `background` (vec4 = vec4(0.09, 0.09, 0.1, 1)) [color]: Color of the other faces of the cube, seen where the two walls leave the frame uncovered during the turn
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/InsideCube.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/InsideCube.sksl
+- Preview: https://gl-transitions.com/editor/InsideCube
+
+## InvertedPageCurl
+
+The outgoing image curls away like a page, revealing the incoming one
+
+- Tags: page, curl, 3d
+- Parameters: none
+- Author: Hewlett-Packard
+- License: BSD 3 Clause
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/InvertedPageCurl.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/InvertedPageCurl.sksl
+- Preview: https://gl-transitions.com/editor/InvertedPageCurl
+
+## Kaleidoscope
+
+A crossfade through a spinning kaleidoscope
+
+- Tags: kaleidoscope, distort, blend
+- Parameters:
+  - `speed` (float = 1)
+  - `angle` (float = 1)
+  - `power` (float = 1.5)
+- Author: nwoeanhinnogaehr
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Kaleidoscope.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Kaleidoscope.sksl
+- Preview: https://gl-transitions.com/editor/Kaleidoscope
+
+## KeyholeWipe
+
+A keyhole grows steadily from the center until the incoming image fills the frame, its bevelled rim and inner shadow making it read as a hole cut in a plate
+
+- Tags: shape, wipe, keyhole, iris, reveal
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Center of the keyhole
+  - `rim` (float = 0.6) [range 0 to 1]: Strength of the bevelled rim around the keyhole and the shadow inside it (0 for a clean cut)
+  - `smoothness` (float = 0.002) [range 0 to 0.05]: Softness of the keyhole's edge
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/KeyholeWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/KeyholeWipe.sksl
+- Preview: https://gl-transitions.com/editor/KeyholeWipe
+
+## LayoutGrid
+
+The frame splits into an asymmetric magazine grid as paper gutters open between the panels; panel after panel in reading order, the incoming image pushes the outgoing one out of its panel from a different side, a colored accent band between them, then the gutters close over the full incoming image
+
+- Tags: grid, panels, magazine, push, slide, layout
+- Parameters:
+  - `gutter` (float = 0.04) [range 0 to 0.08]: Width of the gutters at their widest, as a part of the frame's shorter side
+  - `overlap` (float = 0.55) [range 0 to 0.9]: How much the panels' pushes overlap in time (0 pushes them one strictly after another, 0.9 almost all together)
+  - `band` (float = 0.22) [range 0 to 0.6]: Length of the accent band between the two images, as a part of the panel's length along its push
+  - `shadow` (float = 0.4) [range 0 to 1]: Darkness of the soft shadows the panels cast on the paper and the incoming image casts on the band
+  - `paper` (vec4 = vec4(0.96, 0.95, 0.91, 1)) [color]: Color of the paper seen in the gutters
+  - `accent` (vec4 = vec4(0.93, 0.27, 0.2, 1)) [color]: Color of the accent band between the outgoing and incoming images
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LayoutGrid.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LayoutGrid.sksl
+- Preview: https://gl-transitions.com/editor/LayoutGrid
+
+## LeafWipe
+
+A leaf shape grows from the center to reveal the incoming image
+
+- Tags: shape, wipe
+- Parameters: none
+- Author: @Flexi23
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LeafWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LeafWipe.sksl
+- Preview: https://gl-transitions.com/editor/LeafWipe
+
+## LedWall
+
+The picture zooms into a giant LED screen of round glowing diodes on a dark panel; a refresh wave sweeps across it, each diode flicking with a bright pop as it switches to the incoming image, then the diodes melt back into the plain picture
+
+- Tags: dots, glow, grid, wave
+- Parameters:
+  - `cells` (float = 24) [range 6 to 80]: Number of diodes across the shorter side
+  - `glow` (float = 0.6) [range 0 to 1]: Strength of the glow bleeding from the diodes into the dark panel
+  - `flash` (float = 0.7) [range 0 to 1]: Brightness of the flash of each diode as it switches
+  - `zoom` (float = 0.15) [range 0 to 0.5]: How much the picture zooms in while it is a screen
+  - `triads` (bool = false): Each diode is made of red, green and blue sub-diodes
+  - `direction` (vec2 = vec2(1, 0)): Direction in which the refresh wave sweeps across the screen
+  - `panel` (vec4 = vec4(0.02, 0.02, 0.025, 1)) [color]: Color of the panel between the diodes
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LedWall.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LedWall.sksl
+- Preview: https://gl-transitions.com/editor/LedWall
+
+## LeftRight
+
+The outgoing image shrinks away to the left while the incoming one slides in from the right
+
+- Tags: slide, zoom, horizontal
+- Parameters: none
+- Author: zhmy
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LeftRight.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LeftRight.sksl
+- Preview: https://gl-transitions.com/editor/LeftRight
+
+## LensFlare
+
+A bright light sweeps across the frame and flares the lens: a long thin horizontal streak, a glowing core and a trail of colored ghost reflections; at its peak the incoming image spreads out from the light under its glare
+
+- Tags: light, flare, glow, streak
+- Parameters:
+  - `angle` (float = -12) [range -90 to 90]: Angle of the path of the light, in degrees (0 sweeps from left to right)
+  - `height` (float = 0.18) [range -0.5 to 0.5]: How far above the center of the frame the light passes
+  - `intensity` (float = 1) [range 0 to 2]: Brightness of the flare
+  - `color` (vec3 = vec3(0.35, 0.6, 1)) [color]: Color of the streak and of the glare
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LensFlare.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LensFlare.sksl
+- Preview: https://gl-transitions.com/editor/LensFlare
+
+## LightRays
+
+Shafts of light burst from the highlights of the outgoing image and stream outward from a slowly drifting center; at their peak the incoming image takes over and its own rays shrink back into its highlights
+
+- Tags: light, glow, rays, radial
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.6)): Point the rays stream away from, at the middle of the transition
+  - `drift` (float = 0.15) [range 0 to 0.5]: How far the center drifts during the transition, from left to right
+  - `reach` (float = 0.6) [range 0 to 1]: Length of the rays at the peak, as a fraction of their distance to the center
+  - `threshold` (float = 0.65) [range 0 to 0.8]: Brightness above which the image casts rays
+  - `intensity` (float = 1.5) [range 0 to 4]: Brightness of the rays
+  - `tint` (vec3 = vec3(1, 0.82, 0.55)) [color]: Tint of the rays, toward their ends
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LightRays.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LightRays.sksl
+- Preview: https://gl-transitions.com/editor/LightRays
+
+## LightStreaks
+
+The highlights of the outgoing image flare into long horizontal (or vertical) lens streaks while it smears with motion blur; at the peak the incoming image takes over and its streaks shrink back into its highlights as it sharpens
+
+- Tags: light, flare, motion-blur, glow
+- Parameters:
+  - `reach` (float = 0.6) [range 0 to 2]: Length of the streaks at the peak, in frame widths
+  - `threshold` (float = 0.7) [range 0 to 1]: Brightness above which the image flares
+  - `intensity` (float = 1.5) [range 0 to 4]: Brightness of the streaks
+  - `tint` (vec3 = vec3(0.45, 0.7, 1)) [color]: Tint of the streaks, toward their ends
+  - `blur` (float = 0.1) [range 0 to 0.5]: Length of the motion blur at the peak
+  - `vertical` (bool = false): Streak and smear vertically instead
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LightStreaks.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LightStreaks.sksl
+- Preview: https://gl-transitions.com/editor/LightStreaks
+
+## LightWipe
+
+A band of intense light sweeps across the frame like a glint on glass, blooming the highlights of both images, and leaves the incoming image behind it
+
+- Tags: wipe, light, glow, glint
+- Parameters:
+  - `direction` (vec2 = vec2(1, -0.35)): Direction the band of light moves toward
+  - `width` (float = 0.04) [range 0.005 to 0.2]: Width of the bright core of the band, in frame heights
+  - `intensity` (float = 1.2) [range 0 to 3]: Brightness of the light
+  - `color` (vec3 = vec3(1, 0.86, 0.66)) [color]: Tint of the light, toward the edges of the band (its core burns white)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LightWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LightWipe.sksl
+- Preview: https://gl-transitions.com/editor/LightWipe
+
+## LightningFlash
+
+Forked lightning bolts crack down from the top of the frame, the screen flashes white in a few stuttering strobes, and the incoming image appears lit by the last flickers as they fade out
+
+- Tags: light, flash, weather, strobe
+- Parameters:
+  - `bolts` (int = 2) [range 1 to 3 step 1]: Number of bolts: the main one strikes the ground, the others fork out higher in the sky
+  - `strike` (float = 0.55) [range 0 to 1]: Where the main bolt strikes, from the left (0) to the right (1) of the frame
+  - `seed` (float = 0) [range 0 to 100 step 1]: Changes the shape of the bolts
+  - `color` (vec3 = vec3(0.75, 0.85, 1)) [color]: Color of the light, added to the images
+  - `glow` (float = 0.5) [range 0 to 1]: Size and brightness of the glow around the bolts
+  - `flashes` (int = 3) [range 1 to 4 step 1]: Number of strobes; the images switch during the brightest one
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LightningFlash.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LightningFlash.sksl
+- Preview: https://gl-transitions.com/editor/LightningFlash
+
+## LiquidFill
+
+The incoming image rises over the outgoing one like liquid filling a glass, its surface sloshing in waves, lit by a bright meniscus line, bending the image just below it, with a few bubbles rising through it
+
+- Tags: liquid, water, wave, directional, reveal
+- Parameters:
+  - `direction` (vec2 = vec2(0, 1)): Direction the liquid rises toward
+  - `amplitude` (float = 0.06) [range 0 to 0.3]: Height of the waves on the surface, in frame heights
+  - `waves` (float = 1.5) [range 0.5 to 6]: Number of waves across the frame
+  - `highlight` (vec4 = vec4(1, 1, 1, 0.8)) [color]: Color of the bright line along the surface and the rims of the bubbles (its alpha is its strength)
+  - `refraction` (float = 0.03) [range 0 to 0.1]: How much the incoming image is bent just below the surface
+  - `bubbles` (float = 0.5) [range 0 to 1]: How many bubbles rise through the liquid
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LiquidFill.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LiquidFill.sksl
+- Preview: https://gl-transitions.com/editor/LiquidFill
+
+## LissajousTiles
+
+The image breaks into a grid of tiles that swirl along Lissajous curves, in a Scanimate style, and flip one by one to the incoming image before settling back
+
+- Tags: tiles, grid, motion, retro
+- Parameters:
+  - `speed` (float = 0.5): Speed of the tiles along their curves
+  - `freq` (vec2 = vec2(2, 3)): Number of loops of the curve, horizontally and vertically
+  - `offset` (float = 2): Extra vertical speed, which bends the curve
+  - `zoom` (float = 0.8) [range 0 to 2]: Size of the curve, relative to the image
+  - `fade` (float = 3) [range 0 to 10]: Spread of the tile-by-tile switch to the incoming image
+- Author: Boundless <info@boundless-beta.com>
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LissajousTiles.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LissajousTiles.sksl
+- Preview: https://gl-transitions.com/editor/LissajousTiles
+
+## LumaWipe
+
+A wipe that follows the brightness of a grayscale mask (the luma texture)
+
+- Tags: wipe, luma, mask
+- Parameters: none
+- Extra textures: `luma` (sampler2D)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LumaWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LumaWipe.sksl
+- Preview: https://gl-transitions.com/editor/LumaWipe
+
+## LuminanceMelt
+
+The outgoing image melts away in noisy vertical streaks, depending on its brightness
+
+- Tags: melt, noise, luma
+- Parameters:
+  - `direction` (bool = true): Direction of the melt (false: up, true: down)
+  - `l_threshold` (float = 0.8) [range 0 to 1]: Luminance threshold
+  - `above` (bool = false): Melt the parts above the threshold instead of below
+- Author: 0gust1
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/LuminanceMelt.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/LuminanceMelt.sksl
+- Preview: https://gl-transitions.com/editor/LuminanceMelt
+
+## MoireWipe
+
+Two sets of fine concentric rings, centered on two points that drift toward each other, overlay the image and interfere into a shifting moire of wide bands; the bands open onto the incoming image and widen until it fills the frame, while the thin dark and light ring lines fade away
+
+- Tags: moire, rings, interference, pattern, graphic, reveal
+- Parameters:
+  - `density` (float = 36) [range 10 to 80]: Number of rings per frame height in each set
+  - `bands` (float = 3) [range 1 to 8]: How many moire bands the rings make at the start; they get fewer and wider as the centers come together
+  - `drift` (float = 0.25) [range -1 to 1]: How far the two centers turn around each other, in turns
+  - `lines` (float = 0.5) [range 0 to 1]: Strength of the ring lines drawn over the image
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/MoireWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/MoireWipe.sksl
+- Preview: https://gl-transitions.com/editor/MoireWipe
+
+## Morph
+
+A crossfade in which each image is displaced by the other's colors, like a morph
+
+- Tags: morph, distort, blend
+- Parameters:
+  - `strength` (float = 0.1): Strength of the displacement
+- Author: paniq
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Morph.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Morph.sksl
+- Preview: https://gl-transitions.com/editor/Morph
+
+## Mosaic
+
+The view pans across a mosaic of rotated tiles from both images and settles on the incoming one
+
+- Tags: mosaic, tiles, zoom
+- Parameters:
+  - `endx` (int = 2)
+  - `endy` (int = -1)
+- Author: Xaychru
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Mosaic.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Mosaic.sksl
+- Preview: https://gl-transitions.com/editor/Mosaic
+
+## MultiplyBlend
+
+A crossfade through the multiplied blend of both images
+
+- Tags: blend, fade
+- Parameters: none
+- Author: Fernando Kuteken
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/MultiplyBlend.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/MultiplyBlend.sksl
+- Preview: https://gl-transitions.com/editor/MultiplyBlend
+
+## NoiseDissolve
+
+The incoming image appears pixel by pixel in random noise
+
+- Tags: dissolve, noise
+- Parameters: none
+- Author: towrabbit
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/NoiseDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/NoiseDissolve.sksl
+- Preview: https://gl-transitions.com/editor/NoiseDissolve
+
+## Overexposure
+
+A crossfade through a washed-out, overexposed white
+
+- Tags: flash, light, fade
+- Parameters:
+  - `strength` (float = 0.6): Amount of overexposure
+- Author: Ben Zhang
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Overexposure.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Overexposure.sksl
+- Preview: https://gl-transitions.com/editor/Overexposure
+
+## PaperFold
+
+The outgoing image is a sheet of paper that folds in half in 3D along a vertical crease, then in half again along a horizontal one, its lit and shaded faces turning to show the back of the paper, and the small folded packet flies off the frame, leaving its shadow on the incoming image underneath
+
+- Tags: paper, fold, 3d, shadow
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0.5)): Direction the folded packet flies off toward
+  - `tilt` (float = 0.6) [range 0 to 1]: How much the sheet tilts and recedes while it folds, so that the folds are seen in 3D
+  - `shading` (float = 0.6) [range 0 to 1]: How much the faces darken as they turn away from the light, and the shadows they cast
+  - `paper` (vec4 = vec4(0.95, 0.94, 0.9, 1)) [color]: Color of the back of the paper, through which the print faintly shows
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PaperFold.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PaperFold.sksl
+- Preview: https://gl-transitions.com/editor/PaperFold
+
+## PaperTear
+
+The outgoing image tears in two along a ragged line, and the halves are pulled apart to reveal the incoming one
+
+- Tags: split, horizontal, shadow
+- Parameters:
+  - `roughness` (float = 0.12) [range 0 to 0.3]: How far the tear wanders from the middle, relative to the image height
+  - `tilt` (float = 0.1) [range 0 to 0.5]: How much the top of each half leans away first, so that the tear opens from the top
+  - `rim` (float = 0.012) [range 0 to 0.05]: Width of the white torn edge, relative to the image height
+  - `paper` (vec4 = vec4(1, 0.98, 0.94, 1)) [color]: Color of the paper fibers on the torn edges
+  - `shadow` (vec4 = vec4(0, 0, 0, 0.35)) [color]: Color of the shadow cast on the incoming image
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PaperTear.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PaperTear.sksl
+- Preview: https://gl-transitions.com/editor/PaperTear
+
+## PerlinDissolve
+
+The incoming image appears through blobs of Perlin noise
+
+- Tags: noise, dissolve
+- Parameters:
+  - `scale` (float = 4): Scale of the noise; higher values make smaller blobs
+  - `smoothness` (float = 0.01): Softness of the blob edges
+  - `seed` (float = 12.9898): Random seed
+- Author: Rich Harris
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PerlinDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PerlinDissolve.sksl
+- Preview: https://gl-transitions.com/editor/PerlinDissolve
+
+## PhotoDevelop
+
+The outgoing image washes out to a blank cream card, then the incoming image develops on it like an instant photo: shadows first, faint and tinted, then its contrast and colors come up and it settles
+
+- Tags: fade, color, photo, retro
+- Parameters:
+  - `card` (vec4 = vec4(0.93, 0.91, 0.85, 1)) [color]: Color of the blank card between the two images
+  - `wash` (float = 0.35) [range 0 to 1]: How long the outgoing image takes to wash out (from 10% to 70% of the transition)
+  - `tint` (float = 0.8) [range 0 to 1]: Strength of the cyan and magenta cast while the image develops
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PhotoDevelop.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PhotoDevelop.sksl
+- Preview: https://gl-transitions.com/editor/PhotoDevelop
+
+## Pinwheel
+
+A spinning pinwheel reveals the incoming image
+
+- Tags: pinwheel, radial, rotate
+- Parameters:
+  - `speed` (float = 2): Rotation speed
+- Author: Mr Speaker
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Pinwheel.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Pinwheel.sksl
+- Preview: https://gl-transitions.com/editor/Pinwheel
+
+## PixelStretch
+
+A line sweeps across the frame and drags the outgoing image's pixels behind it as long streaks, which shorten as it goes and reveal the incoming image
+
+- Tags: smear, streaks, directional, chromatic
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0)): Direction in which the line sweeps
+  - `stretch` (float = 0.45) [range 0 to 1]: Length of the streaks at the middle of the sweep, as a part of the frame
+  - `chroma` (float = 0.5) [range 0 to 1]: Amount of RGB split along the streaks
+  - `softness` (float = 0.03) [range 0 to 0.2]: Softness of the line and of the streaks' ends, as a part of the frame
+  - `jitter` (float = 0.5) [range 0 to 1]: How much the streaks jitter, each row at its own length
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PixelStretch.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PixelStretch.sksl
+- Preview: https://gl-transitions.com/editor/PixelStretch
+
+## Pixelize
+
+Both images pixelate, crossfade, then sharpen again
+
+- Tags: pixelate, blend
+- Parameters:
+  - `squaresMin` (ivec2 = ivec2(20, 20)): Number of squares at the strongest pixelation
+  - `steps` (int = 50): Number of pixelation steps; 0 for a continuous effect
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Pixelize.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Pixelize.sksl
+- Preview: https://gl-transitions.com/editor/Pixelize
+
+## PlasmaDissolve
+
+A flowing plasma of sine waves, as in the old demos, draws moving bands through which the incoming image spreads like tendrils, with a glowing edge
+
+- Tags: wipe, plasma, organic, glow
+- Parameters:
+  - `scale` (float = 3) [range 0.5 to 10]: Size of the plasma: higher values make more, thinner bands
+  - `smoothness` (float = 0.1) [range 0 to 0.5]: Softness of the band edges
+  - `flow` (float = 1) [range 0 to 1]: How much the plasma flows during the transition (at most 1, so a revealed area never goes back)
+  - `edgeColor` (vec3 = vec3(1, 0.45, 0.9)) [color]: Color of the glow along the edges
+  - `edgeStrength` (float = 0.6) [range 0 to 2]: Strength of the glow along the edges
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PlasmaDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PlasmaDissolve.sksl
+- Preview: https://gl-transitions.com/editor/PlasmaDissolve
+
+## PlusWipe
+
+A plus-shaped cross grows from the center and widens its arms until the incoming image fills the frame
+
+- Tags: shape, wipe, cross, plus
+- Parameters:
+  - `smoothness` (float = 0.01) [range 0 to 0.1]: Softness of the cross's edge
+  - `reverse` (bool = false): Close four corner rectangles in toward the middle instead
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PlusWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PlusWipe.sksl
+- Preview: https://gl-transitions.com/editor/PlusWipe
+
+## PolkaDotsCurtain
+
+The incoming image appears through growing polka dots
+
+- Tags: dots, pattern
+- Parameters:
+  - `dots` (float = 20): Number of dots across the image
+  - `center` (vec2 = vec2(0, 0))
+- Author: bobylito
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PolkaDotsCurtain.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PolkaDotsCurtain.sksl
+- Preview: https://gl-transitions.com/editor/PolkaDotsCurtain
+
+## PopIn
+
+The incoming image pops in as a rounded card over the outgoing one, with an elastic overshoot: too big, a bit small, then it settles into the full frame as its corners square off
+
+- Tags: pop, scale, zoom, elastic, bounce, shadow
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Point of the frame the incoming image pops from
+  - `bounce` (float = 1) [range 0 to 1.5]: How far the card overshoots (too big, then a bit small) before it settles
+  - `corner` (float = 0.12) [range 0 to 0.5]: Corner radius of the card while it pops, relative to its shorter side
+  - `shadow` (float = 0.5) [range 0 to 1]: Darkness of the drop shadow the card casts on the outgoing image
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PopIn.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PopIn.sksl
+- Preview: https://gl-transitions.com/editor/PopIn
+
+## PowerKaleido
+
+The image folds into an animated kaleidoscope before revealing the incoming one
+
+- Tags: kaleidoscope, distort
+- Parameters:
+  - `scale` (float = 2)
+  - `z` (float = 1.5)
+  - `speed` (float = 5)
+- Author: Boundless
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PowerKaleido.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PowerKaleido.sksl
+- Preview: https://gl-transitions.com/editor/PowerKaleido
+
+## Prisms
+
+The frame is cut into 3D prisms that turn in a cascade, like a rotating billboard, from the outgoing image on one face to the incoming one on the next
+
+- Tags: 3d, rotate, stripes
+- Parameters:
+  - `slats` (int = 8) [range 2 to 40 step 1]: Number of prisms
+  - `stagger` (float = 0.45) [range 0 to 0.9]: Delay of the last prism's turn, as a part of the transition
+  - `perspective` (float = 1) [range 0 to 4]: Amount of perspective
+  - `shading` (float = 0.6) [range 0 to 1]: How much the faces darken as they turn away
+  - `horizontal` (bool = false): Cut the frame into horizontal prisms instead
+  - `backColor` (vec4 = vec4(0, 0, 0, 1)) [color]: Color seen where the turning prisms leave the frame uncovered
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Prisms.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Prisms.sksl
+- Preview: https://gl-transitions.com/editor/Prisms
+
+## ProjectorThrow
+
+The lights go down on the outgoing image and a projector throws the incoming one onto it: a small, blurred, keystoned picture of light lands on the scene, tinted by the colors it falls on, then grows, comes into focus and squares up until it fills the frame as the scene beneath it fades away
+
+- Tags: light, projector, projection, keystone, focus, reveal
+- Parameters:
+  - `darkness` (float = 0.8) [range 0 to 1]: How dark the outgoing image gets once the lights go down
+  - `keystone` (float = 0.45) [range 0 to 0.8]: How much wider the top of the projected picture is than its bottom when it lands
+  - `blur` (float = 0.015) [range 0 to 0.05]: How out of focus the projected picture is when it lands, in frame heights
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ProjectorThrow.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ProjectorThrow.sksl
+- Preview: https://gl-transitions.com/editor/ProjectorThrow
+
+## Puzzle
+
+The image is cut into jigsaw puzzle pieces that lift one after another and fall away, revealing the incoming image
+
+- Tags: tiles, shadow, rotate, fragments
+- Parameters:
+  - `pieces` (float = 5) [range 2 to 12]: Number of pieces across the shorter side
+  - `shadow` (float = 0.6) [range 0 to 1]: Darkness of the shadows of the lifted pieces
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Puzzle.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Puzzle.sksl
+- Preview: https://gl-transitions.com/editor/Puzzle
+
+## PuzzleCube
+
+The frame becomes the face of a twisty cube puzzle: dark gaps open between its cubies, then whole columns and rows of cubies turn a quarter turn around the cube one after another in 3D, each bringing the incoming image from the cube's side to the front, until the gaps close on the incoming image
+
+- Tags: 3d, rotate, grid
+- Parameters:
+  - `size` (int = 3) [range 2 to 8 step 1]: Number of cubies along each side of the face
+  - `gap` (float = 0.012) [range 0 to 0.05]: Width of the gaps between the cubies, as a part of the frame's height
+  - `shading` (float = 0.6) [range 0 to 1]: How much the turning sides darken away from the light, and the shadows inside the cube
+  - `background` (vec4 = vec4(0.04, 0.04, 0.05, 1)) [color]: Color of the cubies' body, seen in the gaps, on their inner sides and around the cube
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/PuzzleCube.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/PuzzleCube.sksl
+- Preview: https://gl-transitions.com/editor/PuzzleCube
+
+## RadialWipe
+
+A radial wipe that sweeps around the center like a clock hand
+
+- Tags: wipe, radial, clock
+- Parameters:
+  - `smoothness` (float = 1)
+- Author: Xaychru
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/RadialWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/RadialWipe.sksl
+- Preview: https://gl-transitions.com/editor/RadialWipe
+
+## RandomSquares
+
+The incoming image appears in random squares
+
+- Tags: squares, grid, dissolve
+- Parameters:
+  - `size` (ivec2 = ivec2(10, 10)): Number of squares (columns, rows)
+  - `smoothness` (float = 0.5): Softness of each square's switch
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/RandomSquares.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/RandomSquares.sksl
+- Preview: https://gl-transitions.com/editor/RandomSquares
+
+## Reassemble
+
+The outgoing image cracks into irregular shards that burst apart toward the viewer, each one turning over in 3D at its own moment, then fly back together and lock into place as the incoming image carried on their backs
+
+- Tags: 3d, shards, flip, explode
+- Parameters:
+  - `rows` (int = 4) [range 2 to 8 step 1]: Number of rows of shards
+  - `depth` (float = 0.8) [range 0 to 1]: How far the shards come toward the viewer
+  - `spread` (float = 0.05) [range 0 to 0.5]: How far the shards spread apart, as a part of their distance from the center
+  - `backColor` (vec4 = vec4(0.04, 0.04, 0.05, 1)) [color]: Color seen between the shards
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Reassemble.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Reassemble.sksl
+- Preview: https://gl-transitions.com/editor/Reassemble
+
+## RectangleCover
+
+A rectangle grows from the center to cover the outgoing image, then shrinks to reveal the incoming one
+
+- Tags: box, shape, iris
+- Parameters:
+  - `bgcolor` (vec4 = vec4(0, 0, 0, 1)) [color]: Color of the rectangle
+- Author: martiniti
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/RectangleCover.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/RectangleCover.sksl
+- Preview: https://gl-transitions.com/editor/RectangleCover
+
+## RectangleIris
+
+The outgoing image shrinks into a small rectangle over a background color, then the incoming one grows from it
+
+- Tags: box, iris, zoom
+- Parameters:
+  - `bgcolor` (vec4 = vec4(0, 0, 0, 1)) [color]: Background color
+- Author: martiniti
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/RectangleIris.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/RectangleIris.sksl
+- Preview: https://gl-transitions.com/editor/RectangleIris
+
+## Refraction
+
+The frame is seen through flowing liquid glass that bends the outgoing image more and more, with rainbow fringes, flares up as the incoming image takes over, then calms down and clears
+
+- Tags: distortion, refraction, chromatic-aberration, glow
+- Parameters:
+  - `strength` (float = 0.15) [range 0 to 0.3]: How far the glass bends the image at the peak
+  - `scale` (float = 2.5) [range 0.5 to 8]: Size of the flowing waves: higher makes smaller waves
+  - `dispersion` (float = 0.5) [range 0 to 1]: Spread of the rainbow fringes
+  - `brightness` (float = 1) [range 0 to 3]: Brightness of the flare at the peak
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Refraction.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Refraction.sksl
+- Preview: https://gl-transitions.com/editor/Refraction
+
+## Revolve
+
+The outgoing image swirls and zooms with motion blur into the incoming one
+
+- Tags: swirl, zoom, rotate, blur
+- Parameters:
+  - `center` (vec2 = vec2(0.46, 0.52)): Center of the swirl
+  - `direction` (float = -1)
+  - `maxRotation` (float = 1.95)
+  - `peakZoom` (float = 2.22)
+  - `swirl` (float = 2.85)
+  - `barrel` (float = 0.38)
+  - `motionBlur` (float = 1)
+  - `switchStart` (float = 0.3)
+  - `switchEnd` (float = 0.5)
+  - `shadow` (float = 0.16)
+- Author: bread
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Revolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Revolve.sksl
+- Preview: https://gl-transitions.com/editor/Revolve
+
+## RibbonTwist
+
+The image twists like a ribbon around its horizontal center line, the twist travelling smoothly across its width, the outgoing image on its front and the incoming one on its back
+
+- Tags: 3d, flip, rotate
+- Parameters:
+  - `spread` (float = 0.8) [range 0.1 to 2]: Length of the twisted section, as a part of the frame's width
+  - `perspective` (float = 0.4) [range 0 to 0.8]: Amount of perspective: the edge turning toward the viewer grows
+  - `shading` (float = 0.6) [range 0 to 1]: How much the ribbon darkens as it turns away
+  - `vertical` (bool = false): Twist around the vertical center line instead, travelling from top to bottom
+  - `backColor` (vec4 = vec4(0, 0, 0, 1)) [color]: Color seen where the twisting ribbon leaves the frame uncovered
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/RibbonTwist.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/RibbonTwist.sksl
+- Preview: https://gl-transitions.com/editor/RibbonTwist
+
+## RingSpin
+
+The frame is cut into concentric rings that spin like the dials of a combination lock, in alternating directions and blurred with speed, one after another from the center outward; each ring overshoots a little and locks into place on the incoming image
+
+- Tags: rotate, circle, rings, motion-blur
+- Parameters:
+  - `rings` (int = 6) [range 2 to 12 step 1]: Number of rings, from the center to the farthest corner
+  - `square` (bool = false): Square rings, like nested frames, instead of round ones
+  - `turns` (int = 1) [range 1 to 3 step 1]: Full turns made by each ring
+  - `stagger` (float = 0.5) [range 0 to 0.8]: Delay between the first ring and the last one, as a part of the transition
+  - `blur` (float = 0.6) [range 0 to 1]: Amount of angular motion blur while the rings spin fast
+  - `settle` (float = 0.5) [range 0 to 1]: Size of the overshoot when a ring locks
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/RingSpin.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/RingSpin.sksl
+- Preview: https://gl-transitions.com/editor/RingSpin
+
+## RingsWipe
+
+Concentric rings ripple out from the center and, one after another, each sweeps around like a clock hand in the opposite direction of its neighbors to reveal the incoming image, or fills across its width, with optional colored borders between the rings
+
+- Tags: wipe, circle, radial, rings, clock
+- Parameters:
+  - `count` (int = 6) [range 1 to 20 step 1]: Number of rings, from the center to the farthest corner
+  - `center` (vec2 = vec2(0.5, 0.5)): Center of the rings, in texture coordinates
+  - `stagger` (float = 0.5) [range 0 to 1]: Delay between the starts of two rings: 0 moves them all together, 1 starts each one when the previous one is done
+  - `radial` (bool = false): Each ring fills across its width, outward and inward in turn, instead of sweeping around
+  - `borderWidth` (float = 0.008) [range 0 to 0.05]: Width of the borders between the rings while they move, in frame heights (0 disables them)
+  - `borderColor` (vec4 = vec4(1, 1, 1, 1)) [color]: Color of the borders between the rings
+  - `smoothness` (float = 0.004) [range 0 to 0.1]: Softness of the edges
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/RingsWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/RingsWipe.sksl
+- Preview: https://gl-transitions.com/editor/RingsWipe
+
+## Ripple
+
+Ripples spread from the center while crossfading
+
+- Tags: ripple, wave, blend
+- Parameters:
+  - `amplitude` (float = 100): Frequency of the ripples
+  - `speed` (float = 50): Speed of the ripples
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Ripple.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Ripple.sksl
+- Preview: https://gl-transitions.com/editor/Ripple
+
+## Rolls
+
+The outgoing image rolls away around a corner, revealing the incoming one
+
+- Tags: rotate, roll
+- Parameters:
+  - `type` (int = 0) [range 0 to 3 step 1]: Corner to roll around
+  - `RotDown` (bool = false): Roll the outgoing image down instead of up
+- Author: Mark Craig
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Rolls.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Rolls.sksl
+- Preview: https://gl-transitions.com/editor/Rolls
+
+## RotateScaleFade
+
+The outgoing image spins and zooms while fading to the incoming one, over a background color
+
+- Tags: rotate, zoom, fade
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Center of the rotation
+  - `rotations` (float = 1): Number of turns
+  - `scale` (float = 8): Maximum zoom
+  - `backColor` (vec4 = vec4(0.15, 0.15, 0.15, 1)) [color]: Background color
+- Author: Fernando Kuteken
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/RotateScaleFade.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/RotateScaleFade.sksl
+- Preview: https://gl-transitions.com/editor/RotateScaleFade
+
+## RotateScaleVanish
+
+The outgoing image spins and shrinks away over the incoming one
+
+- Tags: rotate, zoom, spin
+- Parameters:
+  - `FadeInSecond` (bool = true): Fade in the incoming image
+  - `ReverseEffect` (bool = false): Run the effect in reverse
+  - `ReverseRotation` (bool = false): Rotate the other way
+- Author: Mark Craig
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/RotateScaleVanish.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/RotateScaleVanish.sksl
+- Preview: https://gl-transitions.com/editor/RotateScaleVanish
+
+## SawtoothWipe
+
+A wipe whose edge is a row of sharp, regular triangular teeth sweeps across the frame, or two toothed edges that start interlocked part from the middle like jaws opening
+
+- Tags: wipe, shape, directional, zigzag
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0)): Direction the toothed edge moves toward (with jaws, the axis along which the two edges part)
+  - `teeth` (int = 8) [range 1 to 40 step 1]: Number of teeth along the edge
+  - `depth` (float = 1) [range 0 to 3]: Length of the teeth, relative to their width
+  - `jaws` (bool = false): Two toothed edges part from the middle instead of one sweeping across
+  - `smoothness` (float = 0.004) [range 0 to 0.1]: Softness of the edge
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SawtoothWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SawtoothWipe.sksl
+- Preview: https://gl-transitions.com/editor/SawtoothWipe
+
+## Shatter
+
+The outgoing image cracks like a pane of glass from an impact point, then its shards break loose from the impact outward, tumbling in 3D and falling away with gravity to reveal the incoming image behind
+
+- Tags: shatter, fragments, glass, 3d
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Impact point where the cracks start, from (0, 0) at the bottom left to (1, 1) at the top right
+  - `shards` (float = 6) [range 3 to 8]: Approximate number of rows of shards across the height of the frame
+  - `gravity` (float = 1) [range 0.5 to 3]: Strength of the gravity: the shards fall faster, and break loose over a longer time
+  - `seed` (float = 0): Random seed: another value gives other shards, tumbling another way
+- Author: lbl
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Shatter.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Shatter.sksl
+- Preview: https://gl-transitions.com/editor/Shatter
+
+## Shockwave
+
+A diagonal shockwave breaks the outgoing image into tiny falling glass tiles. Each tile slips away with a brief chromatic split and neon edge glow, revealing the incoming image beneath it.
+
+- Tags: diagonal, mosaic, pixel, cascade, glass, prism, chromatic, neon, cinematic
+- Parameters:
+  - `tileSize` (float = 0.035) [range 0.012 to 0.1]: Size of each square tile relative to slide height
+  - `scatter` (float = 0.85) [range 0 to 1.5]: How far the tiles slide and fall
+  - `diagonal` (float = 0.9) [range 0 to 1]: 0 is a horizontal sweep; 1 is a strongly diagonal sweep
+  - `prism` (float = 0.65) [range 0 to 1]: Amount of red/blue optical separation at the moving edges
+  - `glow` (float = 0.75) [range 0 to 1]: Brightness of the colored edges around moving tiles
+- Author: Gilad Levi, github @Giladx
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Shockwave.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Shockwave.sksl
+- Preview: https://gl-transitions.com/editor/Shockwave
+
+## ShoreWash
+
+A thin sheet of water runs up over the outgoing image like the last of a wave on a beach, its lobed front edged with bubbly foam; it slows, stops just past the far edge and drains back, leaving the incoming image wet and glossy as it dries
+
+- Tags: water, foam, beach, liquid, directional, reveal
+- Parameters:
+  - `direction` (vec2 = vec2(0, 1)): Direction the water runs up toward
+  - `foam` (float = 0.7) [range 0 to 1]: Amount of foam on the front and left behind
+  - `refraction` (float = 0.02) [range 0 to 0.05]: How much the sheet of water bends the image under it
+  - `water` (vec4 = vec4(0.1, 0.6, 0.62, 0.4)) [color]: Color of the water (its alpha is its strength)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ShoreWash.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ShoreWash.sksl
+- Preview: https://gl-transitions.com/editor/ShoreWash
+
+## Shred
+
+The outgoing image is cut into paper strips that drop away at uneven speeds, tilting as they fall, revealing the incoming image
+
+- Tags: slices, stripes, vertical, shadow
+- Parameters:
+  - `strips` (int = 20) [range 4 to 60 step 1]: Number of strips
+  - `stagger` (float = 0.4) [range 0 to 0.8]: Spread of the strips' start times, as a part of the transition
+  - `tilt` (float = 0.1) [range 0 to 0.3]: Largest tilt of a falling strip, in radians
+  - `shadow` (float = 0.5) [range 0 to 1]: Darkness of the strips' cut edges and of their shadow
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Shred.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Shred.sksl
+- Preview: https://gl-transitions.com/editor/Shred
+
+## ShutterWipe
+
+A camera's focal-plane shutter fires across the frame, seen through the camera's gate: thin metal blades fan down from a tight stack above it until they overlap over the whole frame, then keep running down and stack below it, uncovering the incoming image from the top
+
+- Tags: camera, shutter, wipe, metal
+- Parameters:
+  - `blades` (int = 5) [range 3 to 10 step 1]: Number of metal blades
+  - `tilt` (float = 0.06) [range 0 to 0.2]: How much the blades tilt on their arms while they travel
+  - `gate` (float = 0.035) [range 0 to 0.08]: Width of the camera's gate framing the image while the shutter fires, in frame heights
+  - `color` (vec4 = vec4(0.09, 0.09, 0.1, 1)) [color]: Color of the metal blades
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ShutterWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ShutterWipe.sksl
+- Preview: https://gl-transitions.com/editor/ShutterWipe
+
+## SimpleFlip
+
+The outgoing image flips around the vertical axis into the incoming one
+
+- Tags: flip, horizontal
+- Parameters: none
+- Author: nwoeanhinnogaehr
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SimpleFlip.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SimpleFlip.sksl
+- Preview: https://gl-transitions.com/editor/SimpleFlip
+
+## SimpleZoom
+
+Zooms into the outgoing image, then fades to the incoming one
+
+- Tags: zoom, fade
+- Parameters:
+  - `zoom_quickness` (float = 0.8) [range 0.2 to 1]: Part of the transition spent zooming
+- Author: 0gust1
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SimpleZoom.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SimpleZoom.sksl
+- Preview: https://gl-transitions.com/editor/SimpleZoom
+
+## SimpleZoomOut
+
+The incoming image zooms out into place while fading in
+
+- Tags: zoom, fade
+- Parameters:
+  - `zoom_quickness` (float = 0.8) [range 0.2 to 1]: Part of the transition spent zooming
+  - `fade` (bool = true): Fade instead of cutting to the incoming image
+- Author: Tianshuo
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SimpleZoomOut.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SimpleZoomOut.sksl
+- Preview: https://gl-transitions.com/editor/SimpleZoomOut
+
+## SketchDissolve
+
+The outgoing image fades back to blank paper while the incoming one is drawn on it in pencil, outlines first and then hatching in the shadows, before its shading and colors fill in until the picture is complete
+
+- Tags: pencil, drawing, sketch, edges, dissolve
+- Parameters:
+  - `lineWidth` (float = 1.5) [range 0.5 to 4]: Thickness of the pencil outlines, in thousandths of the frame height
+  - `edges` (float = 1) [range 0 to 2]: How many outlines are drawn: higher also traces the fainter edges of the picture
+  - `hatching` (float = 0.6) [range 0 to 1]: Amount of diagonal hatching drawn in the shadows
+  - `paper` (vec4 = vec4(0.96, 0.94, 0.89, 1)) [color]: Color of the paper
+  - `ink` (vec4 = vec4(0.16, 0.16, 0.2, 1)) [color]: Color of the pencil
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SketchDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SketchDissolve.sksl
+- Preview: https://gl-transitions.com/editor/SketchDissolve
+
+## SlideAwayRight
+
+The outgoing image slides to the right, uncovering a crossfade to the incoming one
+
+- Tags: slide, horizontal, blend
+- Parameters: none
+- Author: lizhongjian
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SlideAwayRight.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SlideAwayRight.sksl
+- Preview: https://gl-transitions.com/editor/SlideAwayRight
+
+## Slides
+
+The outgoing image slides out, or the incoming one slides in, toward an edge, a corner or the center
+
+- Tags: slide, directional
+- Parameters:
+  - `type` (int = 0)
+  - `In` (bool = false): Slide the incoming image in instead of the outgoing one out
+- Author: Mark Craig
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Slides.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Slides.sksl
+- Preview: https://gl-transitions.com/editor/Slides
+
+## SlotReels
+
+The frame is cut into vertical reels that spin downward like drums, motion-blurred with speed, carrying the outgoing image then the incoming one, and stop one after another from left to right with a small mechanical bounce
+
+- Tags: 3d, spin, stripes, motion-blur
+- Parameters:
+  - `reels` (int = 5) [range 1 to 16 step 1]: Number of reels
+  - `blur` (float = 0.6) [range 0 to 1]: Amount of vertical motion blur while the reels spin fast
+  - `stagger` (float = 0.45) [range 0 to 0.9]: Delay between the first and the last reel's stop, as a part of the transition
+  - `bounce` (float = 0.5) [range 0 to 1]: Size of the bounce when a reel stops
+  - `separator` (vec4 = vec4(0.04, 0.04, 0.05, 1)) [color]: Color of the separators between the reels
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SlotReels.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SlotReels.sksl
+- Preview: https://gl-transitions.com/editor/SlotReels
+
+## SmokeDissolve
+
+Billowing smoke drifts in across the outgoing image, with lit tops, darker folds and wispy edges, and thickens until it covers the frame; as it thins out and drifts away, the incoming image shows through
+
+- Tags: smoke, fog, organic, noise, cover
+- Parameters:
+  - `direction` (vec2 = vec2(0.5, 0.1)): Direction the smoke drifts toward (it comes in from the opposite side); its length is how far it drifts, in frame heights
+  - `scale` (float = 2.5) [range 1 to 8]: Size of the billows: more, smaller ones with a larger value
+  - `spread` (float = 0.4) [range 0 to 1]: How much the smoke rolls in from one side rather than everywhere at once
+  - `softness` (float = 0.5) [range 0.05 to 1]: Softness of the smoke: wispier, more see-through edges with a larger value
+  - `color` (vec4 = vec4(0.86, 0.86, 0.88, 1)) [color]: Color of the smoke, lit from above
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SmokeDissolve.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SmokeDissolve.sksl
+- Preview: https://gl-transitions.com/editor/SmokeDissolve
+
+## SnakeBlockWipe
+
+Blocks switch to the incoming image one at a time, row after row from the top (or column after column from the left), each line running the opposite way to the one before, like a snake winding across the frame
+
+- Tags: wipe, blocks, grid, zigzag
+- Parameters:
+  - `grid` (ivec2 = ivec2(8, 6)): Number of blocks (columns, rows)
+  - `vertical` (bool = false): Wind down the columns instead of along the rows
+  - `smoothness` (float = 0.5) [range 0 to 4]: How long each block takes to fade in, in turns of one block (0 switches it at once)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SnakeBlockWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SnakeBlockWipe.sksl
+- Preview: https://gl-transitions.com/editor/SnakeBlockWipe
+
+## Snapshot
+
+A camera flash freezes the outgoing image into a printed photo with a white border, which shrinks, tilts and drops out of the frame, revealing the incoming image behind it
+
+- Tags: photo, flash, scale, rotate, fall, shadow
+- Parameters:
+  - `tilt` (float = 0.35) [range 0 to 1]: How much the photo turns as it drops
+  - `border` (float = 0.04) [range 0 to 0.15]: Width of the photo's border, relative to the frame height
+  - `flash` (float = 0.85) [range 0 to 1]: Strength of the camera flash
+  - `shadow` (float = 0.45) [range 0 to 1]: Darkness of the soft shadow the photo casts on the incoming image
+  - `borderColor` (vec4 = vec4(0.96, 0.94, 0.89, 1)) [color]: Color of the photo's border
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Snapshot.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Snapshot.sksl
+- Preview: https://gl-transitions.com/editor/Snapshot
+
+## Sphere
+
+The outgoing image wraps itself onto a shaded ball that shrinks and rolls away, revealing the incoming image under its shadow
+
+- Tags: 3d, sphere, roll, wrap, shape
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0)): Direction the ball rolls away toward
+  - `size` (float = 0.3) [range 0.1 to 0.5]: Radius of the ball once wrapped, relative to the shorter side of the frame
+  - `shading` (float = 0.6) [range 0 to 1]: Strength of the light and shading on the ball
+  - `shadow` (float = 0.5) [range 0 to 1]: Darkness of the soft shadow the ball casts on the incoming image
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Sphere.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Sphere.sksl
+- Preview: https://gl-transitions.com/editor/Sphere
+
+## SpiralBlockWipe
+
+Square blocks switch to the incoming image one after another along a rectangular spiral, from the border inward or from the center outward
+
+- Tags: wipe, grid, blocks, spiral
+- Parameters:
+  - `grid` (ivec2 = ivec2(8, 6)): Number of blocks (columns, rows)
+  - `inward` (bool = true): Spiral from the top left corner inward; false spirals from the center outward, ending at the top left corner
+  - `clockwise` (bool = true): Turn clockwise; false turns counterclockwise
+  - `smoothness` (float = 0.05) [range 0 to 0.5]: Duration of each block's fade, as a fraction of the transition
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SpiralBlockWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SpiralBlockWipe.sksl
+- Preview: https://gl-transitions.com/editor/SpiralBlockWipe
+
+## SpiralWipe
+
+A spiral arm winds out from the center and widens to reveal the incoming image
+
+- Tags: shape, wipe, radial
+- Parameters:
+  - `turns` (float = 3) [range 2 to 8]: Number of turns of the spiral
+  - `smoothness` (float = 0.05) [range 0 to 0.5]: Softness of the arm's edges
+  - `clockwise` (bool = true): Wind clockwise; false winds counterclockwise
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SpiralWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SpiralWipe.sksl
+- Preview: https://gl-transitions.com/editor/SpiralWipe
+
+## SplatterWipe
+
+Splats of paint land one after another, each popping in with a spiky outline, flung droplets and a few drips running down, revealing the incoming image until they cover the frame
+
+- Tags: paint, splash, organic, reveal
+- Parameters:
+  - `splats` (float = 4) [range 2 to 10 step 1]: Number of splats across the frame
+  - `spikiness` (float = 0.6) [range 0 to 1]: How long the spikes around each splat are
+  - `droplets` (float = 0.6) [range 0 to 1]: How many droplets are flung around each splat
+  - `drips` (float = 0.5) [range 0 to 1]: How far the paint drips run down
+  - `rim` (float = 0.5) [range 0 to 1]: How dark and glossy the rim of the splats is
+  - `seed` (float = 3): Random seed for the splats
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SplatterWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SplatterWipe.sksl
+- Preview: https://gl-transitions.com/editor/SplatterWipe
+
+## SplitFlap
+
+The frame becomes a split-flap board: in each cell the top half of the outgoing image flips down on a hinge across the middle, cell after cell, its back bringing the bottom half of the incoming image
+
+- Tags: 3d, flip, grid
+- Parameters:
+  - `size` (ivec2 = ivec2(8, 6)): Number of cells (columns, rows)
+  - `stagger` (float = 0.6) [range 0 to 0.9]: Delay of the last cell's flip, as a part of the transition
+  - `randomness` (float = 0.3) [range 0 to 1]: How much the order of the cells is shuffled, from a wave across the board to random
+  - `flaps` (int = 1) [range 1 to 4 step 1]: Number of flaps that fall in each cell, the ones before the last showing other parts of the incoming image
+  - `gap` (float = 0.004) [range 0 to 0.05]: Width of the gaps between the cells, as a part of the frame's shorter side (the hinges get half of it)
+  - `perspective` (float = 0.35) [range 0 to 1]: Amount of perspective: the falling flaps grow as they come toward the viewer
+  - `shading` (float = 0.4) [range 0 to 1]: How much the flaps darken as they turn away from the light, and the shadows they cast
+  - `background` (vec4 = vec4(0, 0, 0, 1)) [color]: Color seen in the gaps between the cells
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SplitFlap.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SplitFlap.sksl
+- Preview: https://gl-transitions.com/editor/SplitFlap
+
+## SplitSlideInHorizontal
+
+The incoming image slides in as two halves moving horizontally in opposite directions
+
+- Tags: slide, split, horizontal
+- Parameters:
+  - `reverse` (bool = false): Swap the directions of the halves
+- Author: OllyOllyOlly
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SplitSlideInHorizontal.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SplitSlideInHorizontal.sksl
+- Preview: https://gl-transitions.com/editor/SplitSlideInHorizontal
+
+## SplitSlideInOutHorizontal
+
+The halves of both images slide horizontally in opposite directions, out and in at once
+
+- Tags: slide, split, horizontal
+- Parameters:
+  - `reverse` (bool = false): Swap the directions of the halves
+- Author: OllyOllyOlly
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SplitSlideInOutHorizontal.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SplitSlideInOutHorizontal.sksl
+- Preview: https://gl-transitions.com/editor/SplitSlideInOutHorizontal
+
+## SplitSlideInOutVertical
+
+The halves of both images slide vertically in opposite directions, out and in at once
+
+- Tags: slide, split, vertical
+- Parameters:
+  - `reverse` (bool = false): Swap the directions of the halves
+- Author: OllyOllyOlly
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SplitSlideInOutVertical.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SplitSlideInOutVertical.sksl
+- Preview: https://gl-transitions.com/editor/SplitSlideInOutVertical
+
+## SplitSlideInVertical
+
+The incoming image slides in as two halves moving vertically in opposite directions
+
+- Tags: slide, split, vertical
+- Parameters:
+  - `reverse` (bool = false): Swap the directions of the halves
+- Author: OllyOllyOlly
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SplitSlideInVertical.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SplitSlideInVertical.sksl
+- Preview: https://gl-transitions.com/editor/SplitSlideInVertical
+
+## SplitSlideOutHorizontal
+
+The outgoing image slides out as two halves moving horizontally in opposite directions
+
+- Tags: slide, split, horizontal
+- Parameters:
+  - `reverse` (bool = false): Swap the directions of the halves
+- Author: OllyOllyOlly
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SplitSlideOutHorizontal.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SplitSlideOutHorizontal.sksl
+- Preview: https://gl-transitions.com/editor/SplitSlideOutHorizontal
+
+## SplitSlideOutVertical
+
+The outgoing image slides out as two halves moving vertically in opposite directions
+
+- Tags: slide, split, vertical
+- Parameters:
+  - `reverse` (bool = false): Swap the directions of the halves
+- Author: OllyOllyOlly
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SplitSlideOutVertical.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SplitSlideOutVertical.sksl
+- Preview: https://gl-transitions.com/editor/SplitSlideOutVertical
+
+## SpotlightWipe
+
+The stage lights go down on the outgoing image and a soft oval spotlight searches across it along a curved path, comes to rest and lights the incoming image inside it, then widens until the stage lights come back up on the incoming image
+
+- Tags: light, spotlight, stage, iris, reveal
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Point where the spotlight comes to rest and opens from
+  - `size` (float = 0.3) [range 0.08 to 0.45]: Width of the spotlight while it searches, in frame heights
+  - `darkness` (float = 0.85) [range 0 to 1]: How dark the stage gets around the spotlight
+  - `warmth` (vec3 = vec3(1, 0.93, 0.8)) [color]: Tint of the spotlight
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SpotlightWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SpotlightWipe.sksl
+- Preview: https://gl-transitions.com/editor/SpotlightWipe
+
+## SquaresWipe
+
+Squares grow along a diagonal sweep to reveal the incoming image
+
+- Tags: squares, grid, wipe, directional
+- Parameters:
+  - `squares` (ivec2 = ivec2(10, 10)): Number of squares (columns, rows)
+  - `direction` (vec2 = vec2(1, -0.5)): Direction of the sweep
+  - `smoothness` (float = 1.6): Softness of the sweep
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/SquaresWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/SquaresWipe.sksl
+- Preview: https://gl-transitions.com/editor/SquaresWipe
+
+## Squeeze
+
+The outgoing image is squeezed into a line with color separation, revealing the incoming one
+
+- Tags: squeeze, chromatic, vertical
+- Parameters:
+  - `colorSeparation` (float = 0.04): Amount of color separation
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Squeeze.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Squeeze.sksl
+- Preview: https://gl-transitions.com/editor/Squeeze
+
+## StarWipe
+
+A growing star reveals the incoming image
+
+- Tags: wipe, shape, star
+- Parameters:
+  - `border_thickness` (float = 0.01): Thickness of the star's border
+  - `star_rotation` (float = 0.75)
+  - `border_color` (vec4 = vec4(1, 1, 1, 1)) [color]: Color of the star's border
+  - `star_center` (vec2 = vec2(0.5, 0.5)): Center of the star
+- Author: Ben Lucas
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/StarWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/StarWipe.sksl
+- Preview: https://gl-transitions.com/editor/StarWipe
+
+## StaticFade
+
+Cuts to the incoming image halfway, hidden behind a burst of TV static
+
+- Tags: static, noise, retro
+- Parameters:
+  - `n_noise_pixels` (float = 200)
+  - `static_luminosity` (float = 0.8)
+- Author: Ben Lucas
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/StaticFade.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/StaticFade.sksl
+- Preview: https://gl-transitions.com/editor/StaticFade
+
+## StaticWipe
+
+A wipe from top to bottom with a band of TV static at its edge
+
+- Tags: wipe, static, noise, vertical
+- Parameters:
+  - `u_transitionUpToDown` (bool = true): Wipe from top to bottom; false wipes from bottom to top
+  - `u_max_static_span` (float = 0.5): Maximum height of the static band
+- Author: Ben Lucas
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/StaticWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/StaticWipe.sksl
+- Preview: https://gl-transitions.com/editor/StaticWipe
+
+## StereoViewer
+
+Both images shrink into rounded cards that swap, like a stereo viewer toy
+
+- Tags: cards, zoom, retro
+- Parameters:
+  - `zoom` (float = 0.88) [range 0.5 to 1]: How much the images zoom out
+  - `corner_radius` (float = 0.22)
+- Author: Ted Schundler
+- License: BSD 2 Clause
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/StereoViewer.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/StereoViewer.sksl
+- Preview: https://gl-transitions.com/editor/StereoViewer
+
+## StopMotion
+
+The outgoing image is a paper cutout that jerks off the frame in choppy stop-motion steps, with a tiny new tilt and offset each step and a drop shadow, while the incoming cutout jerks in the same way and lands
+
+- Tags: stop-motion, paper, cutout, slide, shadow, choppy
+- Parameters:
+  - `steps` (int = 12) [range 6 to 30 step 1]: Number of held poses during the transition: fewer is choppier
+  - `jitter` (float = 0.5) [range 0 to 1]: Size of the small random tilt and offset given to the cutouts at each step
+  - `shadow` (float = 0.5) [range 0 to 1]: Darkness of the drop shadow the cutouts cast
+  - `backColor` (vec4 = vec4(0.8, 0.71, 0.56, 1)) [color]: Color of the background behind the cutouts
+  - `rimColor` (vec4 = vec4(0.97, 0.96, 0.93, 1)) [color]: Color of the paper rim around the cutouts
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/StopMotion.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/StopMotion.sksl
+- Preview: https://gl-transitions.com/editor/StopMotion
+
+## StretchSlide
+
+The outgoing image stretches out long as it shoots away to one side, pulling in the incoming one squashed behind it, which overshoots and springs back to its shape
+
+- Tags: slide, stretch, squash, elastic, bounce, directional
+- Parameters:
+  - `direction` (vec2 = vec2(-1, 0)): Direction in which the images slide
+  - `stretch` (float = 0.6) [range 0 to 1]: How long the outgoing image stretches and how much the squashed incoming one bulges
+  - `bounce` (float = 0.6) [range 0 to 1]: How far the incoming image overshoots before it springs back to its shape
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/StretchSlide.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/StretchSlide.sksl
+- Preview: https://gl-transitions.com/editor/StretchSlide
+
+## StripDatamoshGlitch
+
+A datamosh glitch: torn strips, chroma shifts and scan noise drag the outgoing image into the incoming one
+
+- Tags: glitch, datamosh, chromatic
+- Parameters:
+  - `strength` (float = 1)
+  - `horizontalBars` (float = 42)
+  - `verticalSlits` (float = 18)
+  - `tear` (float = 0.18)
+  - `chroma` (float = 0.032)
+  - `residue` (float = 0.62)
+  - `noiseAmount` (float = 0.16)
+  - `scanAmount` (float = 0.13)
+  - `flashAmount` (float = 0.2)
+- Author: bread
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/StripDatamoshGlitch.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/StripDatamoshGlitch.sksl
+- Preview: https://gl-transitions.com/editor/StripDatamoshGlitch
+
+## Swap
+
+The two images swap places in 3D, with a floor reflection
+
+- Tags: 3d, swap, reflection
+- Parameters:
+  - `reflection` (float = 0.4): Strength of the reflection
+  - `perspective` (float = 0.2): Amount of perspective
+  - `depth` (float = 3)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Swap.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Swap.sksl
+- Preview: https://gl-transitions.com/editor/Swap
+
+## Swirl
+
+The image twists into a round swirl around the center that peaks mid-way, where the outgoing image dissolves into the incoming one, then untwists
+
+- Tags: swirl, rotate, blend
+- Parameters:
+  - `strength` (float = 1) [range -3 to 3]: Turns of the swirl at its center at the peak (negative turns clockwise)
+  - `radius` (float = 0.9) [range 0.1 to 2]: Radius of the swirl, in frame heights
+  - `center` (vec2 = vec2(0.5, 0.5))
+- Author: Sergey Kosarevsky
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Swirl.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Swirl.sksl
+- Preview: https://gl-transitions.com/editor/Swirl
+
+## TangentMotionBlur
+
+The outgoing image is flung away along a curve with motion blur
+
+- Tags: motion-blur, rotate, slide
+- Parameters: none
+- Author: chenkai
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/TangentMotionBlur.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/TangentMotionBlur.sksl
+- Preview: https://gl-transitions.com/editor/TangentMotionBlur
+
+## TilesWave
+
+The incoming image is revealed tile by tile in a diagonal wave
+
+- Tags: tiles, wave, wipe
+- Parameters:
+  - `tileCount` (ivec2 = ivec2(8, 8)): Number of tiles (columns, rows)
+  - `flipX` (bool = true)
+  - `flipY` (bool = false)
+- Author: numb3r23
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/TilesWave.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/TilesWave.sksl
+- Preview: https://gl-transitions.com/editor/TilesWave
+
+## TopBottom
+
+The outgoing image shrinks away upward while the incoming one slides in from the bottom
+
+- Tags: slide, zoom, vertical
+- Parameters: none
+- Author: zhmy
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/TopBottom.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/TopBottom.sksl
+- Preview: https://gl-transitions.com/editor/TopBottom
+
+## TruchetWipe
+
+A grid of square tiles, each holding two quarter-circle arcs, links into long winding paths; starting from the middle and spreading outward, the paths are drawn as thin lines of the incoming image, then thicken into bands with a dark outline and a soft shadow until they merge over the whole frame
+
+- Tags: truchet, pattern, tiles, paths, graphic, reveal
+- Parameters:
+  - `cells` (float = 8) [range 3 to 20 step 1]: Number of tiles across the frame's height
+  - `outline` (float = 0.6) [range 0 to 1]: Strength of the dark outline and of the shadow along the bands
+  - `spread` (float = 0.75) [range 0 to 1]: How much the paths are staggered from the middle outward: 0 draws them all at once
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/TruchetWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/TruchetWipe.sksl
+- Preview: https://gl-transitions.com/editor/TruchetWipe
+
+## Tumble
+
+The outgoing image is thrown away like a rigid card, tumbling end over end with a slight spin as it flies off into the distance in perspective, its darker back showing on every flip and its soft shadow shrinking on the incoming image behind it
+
+- Tags: 3d, rotate, flip, card, perspective
+- Parameters:
+  - `flips` (float = 2) [range -4 to 4]: Number of turns end over end, negative to tumble the other way
+  - `spin` (float = 0.15) [range -1 to 1]: Turns of the secondary spin around the line of sight
+  - `direction` (vec2 = vec2(0, 0.3)): Where the card flies toward on screen, in frame heights from the center
+  - `perspective` (float = 0.6) [range 0.1 to 1]: Strength of the perspective
+  - `shading` (float = 0.7) [range 0 to 1]: Shading of the card as it turns, darkness of its back and of its shadow
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Tumble.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Tumble.sksl
+- Preview: https://gl-transitions.com/editor/Tumble
+
+## Tunnel
+
+The camera flies down a tunnel lined with the outgoing image toward the incoming one, which opens at its far end and grows to fill the frame
+
+- Tags: zoom, 3d, warp, radial
+- Parameters:
+  - `speed` (float = 6) [range 0.5 to 10]: How far and fast the camera flies down the tunnel
+  - `twist` (float = 0.5) [range -2 to 2]: How much the walls spiral as they rush by
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Tunnel.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Tunnel.sksl
+- Preview: https://gl-transitions.com/editor/Tunnel
+
+## TvLostSignal
+
+A crossfade with drifting tracking lines and tearing, like a TV losing its signal
+
+- Tags: retro, glitch, scanlines
+- Parameters: none
+- Author: mernking (gitlab.com/Godswork)
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/TvLostSignal.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/TvLostSignal.sksl
+- Preview: https://gl-transitions.com/editor/TvLostSignal
+
+## TvRoll
+
+The outgoing image rolls faster and faster, like an old TV losing its vertical hold, then the roll slows down and locks on the incoming image
+
+- Tags: retro, vertical, scanlines
+- Parameters:
+  - `rolls` (int = 3) [range 1 to 8]: Number of frames that roll by
+  - `barHeight` (float = 0.12) [range 0 to 0.5]: Height of the bar between the frames
+  - `barColor` (vec4 = vec4(0, 0, 0, 1)) [color]: Color of the bar between the frames
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/TvRoll.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/TvRoll.sksl
+- Preview: https://gl-transitions.com/editor/TvRoll
+
+## TvStatic
+
+Cuts to full-screen TV static, then to the incoming image
+
+- Tags: static, noise, retro
+- Parameters:
+  - `offset` (float = 0.05): Part of the transition, at each end, that shows the images instead of static
+- Author: Brandon Anzaldi
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/TvStatic.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/TvStatic.sksl
+- Preview: https://gl-transitions.com/editor/TvStatic
+
+## TvTurnOff
+
+The outgoing image collapses into a glowing line and a dot, like an old TV turned off, then the incoming image powers on from the dot
+
+- Tags: retro, vertical, flash
+- Parameters:
+  - `color` (vec4 = vec4(0, 0, 0, 1)) [color]: Color of the switched-off screen
+  - `glow` (float = 1) [range 0 to 2]: Strength of the glow around the line and the dot
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/TvTurnOff.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/TvTurnOff.sksl
+- Preview: https://gl-transitions.com/editor/TvTurnOff
+
+## UndulatingBurnOut
+
+A circle with a wavy edge burns out from the center to reveal the incoming image
+
+- Tags: circle, burn, wipe
+- Parameters:
+  - `smoothness` (float = 0.03): Softness of the edge
+  - `center` (vec2 = vec2(0.5, 0.5)): Center of the circle
+  - `color` (vec4 = vec4(0, 0, 0, 1)) [color]: Color of the burning edge
+- Author: pthrasher
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/UndulatingBurnOut.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/UndulatingBurnOut.sksl
+- Preview: https://gl-transitions.com/editor/UndulatingBurnOut
+
+## Vaporize
+
+The outgoing image goes up in smoke: from one side, the picture itself turns to vapour that rises over what is still intact, curls into wisps and pales as it thins out, revealing the incoming image underneath
+
+- Tags: smoke, organic, noise, directional, reveal
+- Parameters:
+  - `direction` (vec2 = vec2(0, 1)): Direction the vapour rises toward (the image starts turning to vapour on the opposite side)
+  - `rise` (float = 0.4) [range 0.1 to 0.6]: How high the vapour rises above the image before it is gone, in frame heights
+  - `swirl` (float = 0.6) [range 0 to 1]: How much the vapour swirls and curls as it rises
+  - `color` (vec4 = vec4(0.92, 0.92, 0.94, 1)) [color]: Color the vapour pales to as it thins out
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Vaporize.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Vaporize.sksl
+- Preview: https://gl-transitions.com/editor/Vaporize
+
+## VerticalClose
+
+The incoming image closes in from the left and right edges toward the middle
+
+- Tags: wipe, split
+- Parameters: none
+- Author: martiniti
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/VerticalClose.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/VerticalClose.sksl
+- Preview: https://gl-transitions.com/editor/VerticalClose
+
+## VerticalOpen
+
+The incoming image opens from a line in the middle toward the left and right edges
+
+- Tags: wipe, split
+- Parameters: none
+- Author: martiniti
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/VerticalOpen.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/VerticalOpen.sksl
+- Preview: https://gl-transitions.com/editor/VerticalOpen
+
+## VhsTracking
+
+Tape-tracking bands of white snow roll down the frame, tearing the lines around them, with smeared color, wobbling lines, a jittering strip at the bottom and a dropout flash, as the incoming image is recorded over the outgoing one under the densest band
+
+- Tags: retro, glitch, noise, tape, scanlines
+- Parameters:
+  - `bands` (int = 3) [range 1 to 4 step 1]: Number of noise bands rolling down (the first one carries the cut)
+  - `noise` (float = 0.6) [range 0 to 1]: Amount of snow and tearing in the bands
+  - `bleed` (float = 0.5) [range 0 to 1]: How far the color smears to the right of the picture
+  - `wobble` (float = 0.5) [range 0 to 1]: How much the lines wobble sideways
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/VhsTracking.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/VhsTracking.sksl
+- Preview: https://gl-transitions.com/editor/VhsTracking
+
+## Vortex
+
+The outgoing image breaks into hundreds of small squares that a tornado carries away along a spiral around the center, from the eye outward, uncovering the incoming image
+
+- Tags: tiles, spiral, rotation, shatter
+- Parameters:
+  - `grid` (int = 24) [range 4 to 40 step 1]: Number of rows of squares
+  - `center` (vec2 = vec2(0.5, 0.5))
+  - `spin` (float = 1) [range -4 to 4]: Turns each square makes around the center as it flies away (negative turns clockwise)
+  - `randomness` (float = 0.2) [range 0 to 1]: How randomly the squares leave: 0 from the center outward, 1 in any order
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Vortex.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Vortex.sksl
+- Preview: https://gl-transitions.com/editor/Vortex
+
+## WarpSpeed
+
+The camera jumps to light speed: star streaks shoot out from the center and stretch longer and longer while the outgoing image is pulled into a radial smear, then after a flash the incoming image emerges from the center as the streaks shrink back
+
+- Tags: zoom, radial, light, motion-blur, space
+- Parameters:
+  - `center` (vec2 = vec2(0.5, 0.5)): Point the camera flies toward, from (0, 0) at the bottom left to (1, 1) at the top right
+  - `streaks` (float = 160) [range 20 to 400]: Number of star streaks around the center
+  - `streakColor` (vec4 = vec4(0.78, 0.88, 1, 1)) [color]: Color of the streaks and of the flash, added as light
+  - `strength` (float = 0.6) [range 0 to 1]: Length of the streaks and of the radial smear
+  - `flash` (float = 0.5) [range 0 to 1]: Brightness of the flash at the peak of the jump
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/WarpSpeed.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/WarpSpeed.sksl
+- Preview: https://gl-transitions.com/editor/WarpSpeed
+
+## WaterDrop
+
+A drop falls into the image like into still water: round ripples spread out from where it hits, bending the image with glints on their slopes, the incoming image shows up inside the leading ripple, and the water calms down
+
+- Tags: ripple, water, refraction, circle
+- Parameters:
+  - `amplitude` (float = 30) [range 10 to 80]: Frequency of the ripples: higher makes them closer together
+  - `speed` (float = 30) [range 0 to 80]: Speed of the ripples as they run outward through the spreading rings
+  - `center` (vec2 = vec2(0.5, 0.5)): Where the drop falls, in texture coordinates
+  - `refraction` (float = 0.015) [range 0 to 0.08]: How far the ripples bend the image, in frame heights
+  - `highlight` (float = 0.5) [range 0 to 1]: Brightness of the glints on the ripples
+- Author: Paweł Płóciennik
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/WaterDrop.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/WaterDrop.sksl
+- Preview: https://gl-transitions.com/editor/WaterDrop
+
+## WaveWipe
+
+A breaking wave crashes across the frame, its lip curling over in front of its face and throwing foam and spray ahead, its shadow darkening the outgoing image; the incoming image is left behind it, tinted and bent by the water, clearing as the wave passes
+
+- Tags: water, wave, ocean, foam, directional, reveal
+- Parameters:
+  - `direction` (vec2 = vec2(1, 0)): Direction the wave travels toward
+  - `curl` (float = 0.3) [range 0.1 to 0.45]: Size of the curling lip, in wave heights: how far it overhangs ahead of the face
+  - `foam` (float = 0.6) [range 0 to 1]: Amount of foam on the crest and spray thrown ahead of it
+  - `refraction` (float = 0.04) [range 0 to 0.1]: How much the water bends the incoming image behind the wave
+  - `water` (vec4 = vec4(0.05, 0.36, 0.46, 0.75)) [color]: Color of the water tinting the incoming image behind the wave (its alpha is its strength)
+  - `foamColor` (vec4 = vec4(1, 1, 1, 1)) [color]: Color of the foam and spray (its alpha is its strength)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/WaveWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/WaveWipe.sksl
+- Preview: https://gl-transitions.com/editor/WaveWipe
+
+## WedgeWipe
+
+Two hands sweep away from each other around the center, opening a widening wedge that reveals the incoming image
+
+- Tags: wipe, radial, clock, wedge
+- Parameters:
+  - `angle` (float = 0) [range -180 to 180]: Direction the wedge opens from, in degrees clockwise from 12 o'clock
+  - `smoothness` (float = 0.01) [range 0 to 0.2]: Softness of the hands' edges
+  - `center` (vec2 = vec2(0.5, 0.5)): Point the hands turn around
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/WedgeWipe.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/WedgeWipe.sksl
+- Preview: https://gl-transitions.com/editor/WedgeWipe
+
+## WhipPan
+
+A fast camera pan that streaks both images with motion blur, the incoming one arriving from the opposite side
+
+- Tags: slide, motion-blur, directional
+- Parameters:
+  - `direction` (vec2 = vec2(-1, 0)): Direction in which the images move
+  - `blur` (float = 0.4) [range 0 to 1]: Length of the motion blur at full speed
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/WhipPan.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/WhipPan.sksl
+- Preview: https://gl-transitions.com/editor/WhipPan
+
+## WhipSpin
+
+The camera rolls faster and faster around the center of the frame, streaking the outgoing image in a spin blur, then the incoming one takes over mid-spin and slows to a stop
+
+- Tags: rotate, motion-blur, spin
+- Parameters:
+  - `turns` (float = 1) [range -3 to 3]: Total rotation, in turns, split between the two images (negative turns clockwise)
+  - `blur` (float = 0.5) [range 0 to 1]: Length of the motion blur along the spin
+  - `chroma` (float = 0.6) [range 0 to 1]: How much the color channels split apart as the spin speeds up
+  - `zoom` (float = 0.25) [range 0 to 1]: How much the camera zooms in at the fastest point
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/WhipSpin.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/WhipSpin.sksl
+- Preview: https://gl-transitions.com/editor/WhipSpin
+
+## WhipTilt
+
+The camera tilts fast from the outgoing image to the incoming one, set edge to edge at an angle above it, streaking both in perspective with a vertical motion blur
+
+- Tags: 3d, rotate, motion-blur, vertical
+- Parameters:
+  - `down` (bool = false): Tilt the camera down to an incoming image below instead of above
+  - `blur` (float = 0.5) [range 0 to 1]: Length of the motion blur along the tilt
+  - `chroma` (float = 0.5) [range 0 to 1]: How much the color channels split apart as the tilt speeds up
+  - `perspective` (float = 0.7) [range 0 to 1]: Strength of the perspective (field of view of the camera)
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/WhipTilt.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/WhipTilt.sksl
+- Preview: https://gl-transitions.com/editor/WhipTilt
+
+## Wind
+
+A ragged left-to-right wipe, as if the image was blown away by the wind
+
+- Tags: wipe, horizontal, noise
+- Parameters:
+  - `size` (float = 0.2) [range 0 to 1]: Width of the ragged edge
+  - `reversed` (bool = false): Wipe from right to left instead
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/Wind.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/Wind.sksl
+- Preview: https://gl-transitions.com/editor/Wind
+
+## WindowBlinds
+
+A crossfade through horizontal window blinds
+
+- Tags: blinds, stripes, blend
+- Parameters: none
+- Author: Fabien Benetou
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/WindowBlinds.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/WindowBlinds.sksl
+- Preview: https://gl-transitions.com/editor/WindowBlinds
+
+## WindowSlices
+
+The incoming image appears through vertical slices that widen
+
+- Tags: slices, stripes, wipe
+- Parameters:
+  - `count` (float = 10): Number of slices
+  - `smoothness` (float = 0.5): Softness of the slices' edges
+- Author: gre
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/WindowSlices.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/WindowSlices.sksl
+- Preview: https://gl-transitions.com/editor/WindowSlices
+
+## ZoomInCircles
+
+Concentric rings of the outgoing image zoom at different speeds before revealing the incoming one
+
+- Tags: zoom, circle
+- Parameters: none
+- Author: dycm8009
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ZoomInCircles.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ZoomInCircles.sksl
+- Preview: https://gl-transitions.com/editor/ZoomInCircles
+
+## ZoomInOut
+
+Zooms into the outgoing image until it blurs into a flat color, then out to the incoming one
+
+- Tags: zoom, blur
+- Parameters: none
+- Author: OllyOllyOlly
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ZoomInOut.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ZoomInOut.sksl
+- Preview: https://gl-transitions.com/editor/ZoomInOut
+
+## ZoomWipeLeft
+
+Zooms into the outgoing image, then the incoming one wipes in from right to left
+
+- Tags: zoom, wipe, horizontal
+- Parameters:
+  - `zoom_quickness` (float = 0.8): Part of the first half spent zooming (capped at 0.5)
+- Author: Handk
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ZoomWipeLeft.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ZoomWipeLeft.sksl
+- Preview: https://gl-transitions.com/editor/ZoomWipeLeft
+
+## ZoomWipeRight
+
+Zooms into the outgoing image, then the incoming one wipes in from left to right
+
+- Tags: zoom, wipe, horizontal
+- Parameters:
+  - `zoom_quickness` (float = 0.8): Part of the first half spent zooming (capped at 0.5)
+- Author: Handk
+- License: MIT
+- GLSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/transitions/ZoomWipeRight.glsl
+- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@3.3.0/sksl/ZoomWipeRight.sksl
+- Preview: https://gl-transitions.com/editor/ZoomWipeRight

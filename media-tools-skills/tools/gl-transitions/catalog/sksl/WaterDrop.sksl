@@ -1,0 +1,89 @@
+// WaterDrop — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/WaterDrop.glsl
+// Author: Paweł Płóciennik
+// License: MIT
+// Description: A drop falls into the image like into still water: round ripples spread out from where it hits, bending the image with glints on their slopes, the incoming image shows up inside the leading ripple, and the water calms down
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float amplitude; 
+
+uniform float speed; 
+
+uniform vec2 center; 
+
+uniform float refraction; 
+
+uniform float highlight; 
+
+vec2 mirror(vec2 v) {
+  return 1.0 - abs(1.0 - mod(v, 2.0));
+}
+
+float wave(float s, float k, float lambda, float t) {
+  
+  float env = smoothstep(-0.3 * lambda, 0.6 * lambda, s) * exp(-s / (3.5 * lambda));
+  
+  return env * sin(k * s + speed * t);
+}
+
+vec4 transition(vec2 uv) {
+  if (progress <= 0.0) return getFromColor(uv);
+  if (progress >= 1.0) return getToColor(uv);
+
+  float k = 2.0 * max(amplitude, 1.0);
+  float lambda = 6.2831853 / k;
+  
+  vec2 q = (uv - center) * vec2(ratio, 1.0);
+  float r = length(q);
+  vec2 dir = r > 0.0 ? q / r : vec2(0.0);
+  
+  vec2 far = max(center, 1.0 - center) * vec2(ratio, 1.0);
+  float R = length(far);
+
+  
+  float edge = 0.35 * lambda;
+  float soft = 0.1 * lambda;
+  
+  
+  float t = progress;
+  float e = mix(t, 1.0 - (1.0 - t) * (1.0 - t), 0.4);
+  float front = mix(-0.3 * lambda, R + edge + soft + 0.01, e);
+  float s = front - r;
+
+  
+  float calm = 1.0 - smoothstep(0.55, 1.0, t);
+  calm *= calm;
+  
+  
+  float d = 0.02 * lambda;
+  float r0 = max(r - d, 0.0);
+  float slope = calm * (wave(front - r - d, k, lambda, t) - wave(front - r0, k, lambda, t)) / ((r + d - r0) * k);
+  vec2 offset = dir * slope * refraction / vec2(ratio, 1.0);
+
+  vec4 ca = getFromColor(mirror(uv - offset));
+  vec4 cb = getToColor(mirror(uv - offset));
+  float m = smoothstep(edge - soft, edge + soft, s);
+  
+  vec4 c = mix(vec4(ca.rgb * ca.a, ca.a), vec4(cb.rgb * cb.a, cb.a), m);
+
+  
+  
+  float h = calm * wave(s, k, lambda, t);
+  float lit = -dot(dir, normalize(vec2(-0.6, 0.8))) * slope;
+  float glint = highlight * (0.2 * h + 0.6 * smoothstep(0.2, 0.9, lit) - 0.3 * smoothstep(0.2, 0.9, -lit));
+  c.rgb = clamp(c.rgb + glint * c.a, 0.0, c.a);
+  return c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

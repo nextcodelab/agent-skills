@@ -1,0 +1,84 @@
+// PixelStretch — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/PixelStretch.glsl
+// Author: gre
+// License: MIT
+// Description: A line sweeps across the frame and drags the outgoing image's pixels behind it as long streaks, which shorten as it goes and reveal the incoming image
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform vec2 direction; 
+
+uniform float stretch; 
+
+uniform float chroma; 
+
+uniform float softness; 
+
+uniform float jitter; 
+
+float hash(float n) {
+  n = fract(n * 0.1031);
+  n *= n + 33.33;
+  n *= n + n;
+  return fract(n);
+}
+
+float smax(float x, float y, float k) {
+  float h = max(k - abs(x - y), 0.0) / k;
+  return max(x, y) + h * h * k * 0.25;
+}
+
+vec2 at(vec2 uv, float s0, float s, vec2 d, float ext) {
+  return clamp(uv + d * (s - s0) * ext, 0.0, 1.0);
+}
+
+vec4 transition(vec2 uv) {
+  vec2 d = normalize(direction + vec2(1e-6, 0.0));
+  
+  float ext = abs(d.x) + abs(d.y);
+  float s = 0.5 + dot(uv - 0.5, d) / ext;
+  
+  vec2 n = vec2(-d.y, d.x);
+  float t = dot((uv - 0.5) * vec2(ratio, 1.0), n);
+  float row = floor(t * 540.0);
+  float clump = floor(t * 60.0);
+  float rnd = 0.6 * hash(row + 17.0) + 0.4 * hash(clump + 311.0);
+
+  float p = progress;
+  float k = softness + 1e-4;
+  
+  
+  float margin = k + 0.002;
+  float a = mix(-margin, 1.0 + margin, mix(p, p * p * (3.0 - 2.0 * p), 0.5));
+
+  
+  
+  float h = clamp(4.0 * a * (1.0 - a), 0.0, 1.0);
+  float len = stretch * h * (1.0 - 0.6 * jitter * rnd);
+  float split = 0.02 * chroma * h;
+
+  
+  vec4 fr = getFromColor(at(uv, s, smax(s, a + split, k), d, ext));
+  vec4 fg = getFromColor(at(uv, s, smax(s, a, k), d, ext));
+  vec4 fb = getFromColor(at(uv, s, smax(s, a - split, k), d, ext));
+  vec4 streak = vec4(fr.r, fg.g, fb.b, fg.a);
+  
+  float behind = step(s, a);
+  streak.rgb *= 1.0 + 0.06 * jitter * h * (hash(row * 3.0 + 5.0) - 0.5) * behind;
+
+  
+  float w = smoothstep(len - k, len + k, a - s);
+  return mix(streak, getToColor(uv), w);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

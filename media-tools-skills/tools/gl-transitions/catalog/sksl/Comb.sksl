@@ -1,0 +1,39 @@
+// Comb — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/Comb.glsl
+// Author: gre
+// License: MIT
+// Description: The frame is cut into interleaved strips that slide in opposite directions, each pushing the outgoing image out and the incoming one in
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform int strips; 
+
+uniform int vertical; 
+
+vec4 transition (vec2 uv) {
+  
+  float a = (vertical != 0) ? uv.y : uv.x;
+  float b = (vertical != 0) ? uv.x : uv.y;
+  
+  float dir = mod(floor(b * float(strips)), 2.0) < 0.5 ? 1.0 : -1.0;
+  
+  float t = mix(progress, progress * progress * (3.0 - 2.0 * progress), 0.6);
+  float fa = a - dir * t;
+  if (fa >= 0.0 && fa <= 1.0) {
+    return getFromColor((vertical != 0) ? vec2(b, fa) : vec2(fa, b));
+  }
+  float ta = fa + dir;
+  return getToColor((vertical != 0) ? vec2(b, ta) : vec2(ta, b));
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

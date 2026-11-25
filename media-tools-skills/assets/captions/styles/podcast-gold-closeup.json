@@ -1,0 +1,28 @@
+{
+  "id": "podcast-gold-closeup",
+  "description": "Short uppercase podcast captions with gold word highlighting above the platform controls.",
+  "tags": [
+    "podcast",
+    "gold",
+    "uppercase",
+    "word-sync"
+  ],
+  "font_name": "Arial",
+  "font_size": 80,
+  "base_color_ass": "&H00D5E8F5&",
+  "highlight_color_ass": "&H0035D7FF&",
+  "outline_color_ass": "&H00161310&",
+  "back_color_ass": "&H78000000&",
+  "bold": true,
+  "uppercase": true,
+  "outline": 4,
+  "shadow": 3,
+  "alignment": 2,
+  "margin_left": 95,
+  "margin_right": 145,
+  "margin_vertical": 590,
+  "max_words": 3,
+  "max_caption_seconds": 1.35,
+  "entrance": "none",
+  "highlight_mode": "karaoke"
+}

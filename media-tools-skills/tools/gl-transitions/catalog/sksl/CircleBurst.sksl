@@ -1,0 +1,84 @@
+// CircleBurst — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/CircleBurst.glsl
+// Author: gre
+// License: MIT
+// Description: Discs of three solid colors burst out of a point one after another, each covering the last, then a hole bursts open from the same point in the last one to reveal the incoming image
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform vec2 center; 
+
+uniform vec4 color1; 
+
+uniform vec4 color2; 
+
+uniform vec4 color3; 
+
+uniform float stagger; 
+
+const float AA = 0.0015;
+
+const float SW = 0.03;
+const float SO = 0.32;
+
+float phase(float s, float d) {
+  return clamp((progress - s) / d, 0.0, 1.0);
+}
+
+float radius(float t, float R) {
+  float u = 1.0 - t;
+  return mix(-SW - AA, R, mix(t, 1.0 - u * u * u, 0.8));
+}
+
+vec2 mirror(vec2 v) {
+  return 1.0 - abs(1.0 - mod(abs(v), 2.0));
+}
+
+vec4 layer(vec4 p, vec4 c, float r, float x) {
+  float k = smoothstep(r - AA, r + AA, x);
+  float s = SO * c.a * k * (1.0 - smoothstep(0.0, SW, x - r));
+  p = p * (1.0 - s) + vec4(0.0, 0.0, 0.0, s);
+  k = c.a * (1.0 - k);
+  return p * (1.0 - k) + vec4(c.rgb, 1.0) * k;
+}
+
+vec4 transition(vec2 uv) {
+  vec2 asp = vec2(ratio, 1.0);
+  float x = length((uv - center) * asp);
+  
+  float R = length(max(center, 1.0 - center) * asp) + SW + AA;
+  float k = clamp(stagger, 0.0, 1.0);
+  float d = 1.0 / (1.0 + 3.0 * k);
+
+  
+  float t = phase(0.0, d);
+  vec4 a = getFromColor(mirror(center + (uv - center) / (1.0 + 0.06 * t * (2.0 - t))));
+  vec4 p = vec4(a.rgb * a.a, a.a);
+  p = layer(p, color1, radius(t, R), x);
+  p = layer(p, color2, radius(phase(k * d, d), R), x);
+  float r = radius(phase(2.0 * k * d, d), R);
+  p = layer(p, color3, r, x);
+
+  
+  
+  t = phase(3.0 * k * d, d);
+  float h = radius(t, R);
+  float u = 1.0 - t;
+  vec4 b = getToColor(mirror(center + (uv - center) / (1.0 + 0.14 * u * u * (1.0 - 2.4 * t))));
+  float s = SO * color3.a * clamp((r - h) / SW, 0.0, 1.0) * (1.0 - smoothstep(0.0, SW, h - x));
+  vec4 q = vec4(b.rgb * b.a * (1.0 - s), b.a * (1.0 - s) + s);
+  p = mix(p, q, 1.0 - smoothstep(h - AA, h + AA, x));
+  return p.a > 0.0 ? vec4(p.rgb / p.a, p.a) : vec4(0.0);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

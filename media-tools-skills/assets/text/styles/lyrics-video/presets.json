@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "styles": {
+    "classic-videoke": {
+      "font": "Arial",
+      "size": 66,
+      "base": "#FFF9E9",
+      "accent": "#FFDA45",
+      "edge": "#341F16",
+      "background": "#11192D",
+      "placement": 63,
+      "outline": 5,
+      "shadow": 2,
+      "highlight": "sung"
+    },
+    "neon-stage": {
+      "font": "Segoe UI",
+      "size": 70,
+      "base": "#E6F6FF",
+      "accent": "#5CF6FB",
+      "edge": "#263160",
+      "background": "#160E28",
+      "placement": 55,
+      "outline": 6,
+      "shadow": 4,
+      "highlight": "active"
+    },
+    "cinema-serif": {
+      "font": "Georgia",
+      "size": 63,
+      "base": "#F8F1E2",
+      "accent": "#EAB479",
+      "edge": "#251918",
+      "background": "#1B1B23",
+      "placement": 68,
+      "outline": 4,
+      "shadow": 2,
+      "italic": true,
+      "highlight": "active"
+    },
+    "bubble-pop": {
+      "font": "Arial Rounded MT Bold",
+      "size": 70,
+      "base": "#FFF7FC",
+      "accent": "#FF94BE",
+      "edge": "#401650",
+      "background": "#271B3B",
+      "placement": 51,
+      "outline": 6,
+      "shadow": 4,
+      "highlight": "active"
+    },
+    "monospace-mint": {
+      "font": "Consolas",
+      "size": 60,
+      "base": "#DCEAE4",
+      "accent": "#9CF9C0",
+      "edge": "#052823",
+      "background": "#071C1D",
+      "placement": 62,
+      "outline": 4,
+      "shadow": 1,
+      "highlight": "sung"
+    },
+    "stadium-chant": {
+      "font": "Impact",
+      "size": 76,
+      "base": "#FAF7FF",
+      "accent": "#FF7657",
+      "edge": "#2B1B3A",
+      "background": "#231A36",
+      "placement": 62,
+      "outline": 6,
+      "shadow": 3,
+      "uppercase": true,
+      "highlight": "active"
+    },
+    "soft-pastel": {
+      "font": "Trebuchet MS",
+      "size": 64,
+      "base": "#FFF7F0",
+      "accent": "#FFC5E2",
+      "edge": "#423044",
+      "background": "#2F283D",
+      "placement": 58,
+      "outline": 4,
+      "shadow": 2,
+      "highlight": "sung"
+    }
+  }
+}

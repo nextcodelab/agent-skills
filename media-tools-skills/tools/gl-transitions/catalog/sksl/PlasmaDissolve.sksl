@@ -1,0 +1,64 @@
+// PlasmaDissolve — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/PlasmaDissolve.glsl
+// Author: gre
+// License: MIT
+// Description: A flowing plasma of sine waves, as in the old demos, draws moving bands through which the incoming image spreads like tendrils, with a glowing edge
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float scale; 
+
+uniform float smoothness; 
+
+uniform float flow; 
+
+uniform vec3 edgeColor; 
+
+uniform float edgeStrength; 
+
+const float PI = 3.14159265;
+
+vec4 transition(vec2 uv) {
+  vec4 a = getFromColor(uv);
+  vec4 b = getToColor(uv);
+  if (progress <= 0.0) return a;
+  if (progress >= 1.0) return b;
+
+  
+  vec2 p = (uv - 0.5) * vec2(ratio, 1.0) * max(scale, 0.0) * 2.0 * PI;
+  
+  
+  float t = clamp(flow, 0.0, 1.0) * progress * 0.5;
+  
+  float v = sin(p.x * 0.6 + t)
+    + sin(p.y * 0.8 - t * 0.8)
+    + sin((p.x * 0.5 + p.y * 0.7) * 0.7 + t * 0.6)
+    + sin(length(p - vec2(0.15, -0.1) * max(scale, 0.0) * 2.0 * PI) * 0.9 - t * 1.2);
+  
+  v = abs(fract(v * 0.25 + 0.5) * 2.0 - 1.0);
+
+  
+  float s = max(smoothness, 0.001);
+  float threshold = mix(-s, 1.0 + s, progress);
+  
+  float m = 1.0 - smoothstep(threshold - s, threshold + s, v);
+
+  
+  vec4 col = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
+  if (col.a <= 0.0) return vec4(0.0);
+  
+  float glow = 4.0 * m * (1.0 - m) * max(edgeStrength, 0.0);
+  return vec4(col.rgb / col.a + edgeColor * glow, col.a);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

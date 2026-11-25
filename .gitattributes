@@ -1,0 +1,5 @@
+media-tools-skills/tools/captioning/models/** filter=lfs diff=lfs merge=lfs -text
+media-tools-skills/tools/ffmpeg/bin/** filter=lfs diff=lfs merge=lfs -text
+media-tools-skills/tools/browser/** filter=lfs diff=lfs merge=lfs -text
+media-tools-skills/tools/python-video/vendor/** filter=lfs diff=lfs merge=lfs -text
+media-tools-skills/.download-staging/** filter=lfs diff=lfs merge=lfs -text

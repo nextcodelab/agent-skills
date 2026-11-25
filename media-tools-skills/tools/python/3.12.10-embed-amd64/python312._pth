@@ -1,0 +1,7 @@
+python312.zip
+.
+# The timeline runner starts the bundled FFmpeg skill scripts as child processes.
+..\..\..\.agents\skills\ffmpeg-skill\scripts
+
+# Uncomment to run site.main() automatically
+#import site

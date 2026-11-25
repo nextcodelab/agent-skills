@@ -1,0 +1,50 @@
+// PlusWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/PlusWipe.glsl
+// Author: gre
+// License: MIT
+// Description: A plus-shaped cross grows from the center and widens its arms until the incoming image fills the frame
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float smoothness; 
+
+uniform int reverse; 
+
+float boxDist (vec2 p, vec2 halfSize) {
+  vec2 d = abs(p) - halfSize;
+  return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
+
+float plus (vec2 q, float t, float s) {
+  vec2 frame = vec2(0.5 * ratio, 0.5);
+  float k = min(frame.x, frame.y);
+  
+  
+  vec2 halfWidth = k * t + (frame - k) * t * t;
+  
+  float halfLength = 3.0 * max(frame.x, frame.y) * t;
+  float d = min(boxDist(q, vec2(halfLength, halfWidth.y)), boxDist(q, vec2(halfWidth.x, halfLength)));
+  
+  
+  return 1.0 - smoothstep(0.0, s, d + s * (1.0 - t));
+}
+
+vec4 transition (vec2 uv) {
+  
+  vec2 q = (uv - 0.5) * vec2(ratio, 1.0);
+  float s = max(smoothness, 0.001);
+  float m = (reverse != 0) ? 1.0 - plus(q, 1.0 - progress, s) : plus(q, progress, s);
+  return mix(getFromColor(uv), getToColor(uv), m);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" role="img" aria-labelledby="title">
+  <title id="title">Folder popup</title>
+  <rect x="36" y="36" width="328" height="328" rx="68" fill="#17253a" stroke="#eef7ff" stroke-width="8"/>
+  <path d="M95 145a20 20 0 0 1 20-20h60l23 24h86a20 20 0 0 1 20 20v75H95z" fill="#6cbcff"/>
+  <path d="M111 178h186a17 17 0 0 1 16 22l-19 62a17 17 0 0 1-16 12H114a17 17 0 0 1-17-19l-3-59a17 17 0 0 1 17-18z" fill="#ffd177"/>
+  <path d="M119 195h164" stroke="#fff1c7" stroke-width="6" stroke-linecap="round"/>
+</svg>

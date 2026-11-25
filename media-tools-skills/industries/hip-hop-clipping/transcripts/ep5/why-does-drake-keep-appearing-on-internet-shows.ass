@@ -1,0 +1,54 @@
+﻿[Script Info]
+Title: Local timed speech captions
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Default,Arial,62,&H00FFFFFF,&H0046BEF7,&H002F2114,&H64000000,1,0,0,0,100,100,0,0,1,5,2,2,72,72,510,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.12,0:00:01.07,Default,,0,0,0,,{\fad(70,70)}Can I ask\Nyou about
+Dialogue: 0,0:00:01.07,0:00:02.41,Default,,0,0,0,,{\fad(70,70)}some things I\Nsee artists
+Dialogue: 0,0:00:02.41,0:00:03.70,Default,,0,0,0,,{\fad(70,70)}do and ask\Nyou why
+Dialogue: 0,0:00:03.70,0:00:04.92,Default,,0,0,0,,{\fad(70,70)}they do\Nthem?
+Dialogue: 0,0:00:04.92,0:00:06.38,Default,,0,0,0,,{\fad(70,70)}Okay, if I\Nknow the
+Dialogue: 0,0:00:06.38,0:00:07.24,Default,,0,0,0,,{\fad(70,70)}answer.
+Dialogue: 0,0:00:07.24,0:00:09.80,Default,,0,0,0,,{\fad(70,70)}Why does\N{\c&H46BEF7&\b1}Drake{\c&HFFFFFF&\b1} stream?
+Dialogue: 0,0:00:09.80,0:00:10.79,Default,,0,0,0,,{\fad(70,70)}What do you\Nmean, "Why
+Dialogue: 0,0:00:10.79,0:00:11.80,Default,,0,0,0,,{\fad(70,70)}does {\c&H46BEF7&\b1}Drake{\c&HFFFFFF&\b1}\Nstream?"
+Dialogue: 0,0:00:11.80,0:00:12.75,Default,,0,0,0,,{\fad(70,70)}Like, why is\Nhe successful
+Dialogue: 0,0:00:12.75,0:00:13.35,Default,,0,0,0,,{\fad(70,70)}at streaming?
+Dialogue: 0,0:00:13.35,0:00:14.68,Default,,0,0,0,,{\fad(70,70)}Oh, no, no,\Nbut like,
+Dialogue: 0,0:00:14.68,0:00:18.32,Default,,0,0,0,,{\fad(70,70)}{\c&H46BEF7&\b1}Drake{\c&HFFFFFF&\b1} does, like,\Nthese {\c&H46BEF7&\b1}internet{\c&HFFFFFF&\b1}
+Dialogue: 0,0:00:18.32,0:00:20.54,Default,,0,0,0,,{\fad(70,70)}{\c&H46BEF7&\b1}shows{\c&HFFFFFF&\b1} or, like,\Nhe'll just,
+Dialogue: 0,0:00:20.54,0:00:21.80,Default,,0,0,0,,{\fad(70,70)}like, stream\Nhimself live.
+Dialogue: 0,0:00:21.80,0:00:22.40,Default,,0,0,0,,{\fad(70,70)}Oh, you mean\Nwhy his
+Dialogue: 0,0:00:22.40,0:00:23.00,Default,,0,0,0,,{\fad(70,70)}music {\c&H46BEF7&\b1}shows?{\c&HFFFFFF&\b1}
+Dialogue: 0,0:00:23.00,0:00:23.60,Default,,0,0,0,,{\fad(70,70)}Oh, no, no,\Nsorry, sorry,
+Dialogue: 0,0:00:23.60,0:00:24.20,Default,,0,0,0,,{\fad(70,70)}I don't mean\Nhis music,
+Dialogue: 0,0:00:24.20,0:00:26.39,Default,,0,0,0,,{\fad(70,70)}but like, he'll\Ngo on
+Dialogue: 0,0:00:26.39,0:00:27.56,Default,,0,0,0,,{\fad(70,70)}{\c&H46BEF7&\b1}internet{\c&HFFFFFF&\b1} {\c&H46BEF7&\b1}shows{\c&HFFFFFF&\b1}\Nthat, like...
+Dialogue: 0,0:00:29.72,0:00:31.48,Default,,0,0,0,,{\fad(70,70)}Like doing a\N20v1, like...
+Dialogue: 0,0:00:31.48,0:00:34.37,Default,,0,0,0,,{\fad(70,70)}Yeah, 20v1, or\Nhe finds
+Dialogue: 0,0:00:34.37,0:00:35.80,Default,,0,0,0,,{\fad(70,70)}his goth\Nwife.
+Dialogue: 0,0:00:35.80,0:00:36.44,Default,,0,0,0,,{\fad(70,70)}Yeah, yeah,\Nyeah.
+Dialogue: 0,0:00:36.44,0:00:38.47,Default,,0,0,0,,{\fad(70,70)}Like, is that\Nmoney he's
+Dialogue: 0,0:00:38.47,0:00:39.80,Default,,0,0,0,,{\fad(70,70)}doing it\Nfor?
+Dialogue: 0,0:00:39.80,0:00:41.48,Default,,0,0,0,,{\fad(70,70)}I'm sure everything\N{\c&H46BEF7&\b1}Drake{\c&HFFFFFF&\b1} does,
+Dialogue: 0,0:00:41.48,0:00:44.00,Default,,0,0,0,,{\fad(70,70)}he's getting money\Nfrom because
+Dialogue: 0,0:00:44.00,0:00:45.64,Default,,0,0,0,,{\fad(70,70)}he's such\Na brand.
+Dialogue: 0,0:00:46.16,0:00:47.55,Default,,0,0,0,,{\fad(70,70)}So, if he's\Ndoing that,
+Dialogue: 0,0:00:47.55,0:00:48.36,Default,,0,0,0,,{\fad(70,70)}right?
+Dialogue: 0,0:00:48.36,0:00:48.96,Default,,0,0,0,,{\fad(70,70)}Yeah.
+Dialogue: 0,0:00:48.96,0:00:49.92,Default,,0,0,0,,{\fad(70,70)}And he's putting\Nit on
+Dialogue: 0,0:00:49.92,0:00:52.04,Default,,0,0,0,,{\fad(70,70)}YouTube and seeing\Nmillions of
+Dialogue: 0,0:00:52.04,0:00:53.73,Default,,0,0,0,,{\fad(70,70)}views, I mean,\Nthere's a
+Dialogue: 0,0:00:53.73,0:00:55.79,Default,,0,0,0,,{\fad(70,70)}financial aspect of\Nit, but
+Dialogue: 0,0:00:55.79,0:00:56.83,Default,,0,0,0,,{\fad(70,70)}I also think\Nmaybe the
+Dialogue: 0,0:00:56.83,0:00:58.16,Default,,0,0,0,,{\fad(70,70)}guys are just\Nhaving fun,
+Dialogue: 0,0:00:58.16,0:00:58.92,Default,,0,0,0,,{\fad(70,70)}honestly.

@@ -1,0 +1,115 @@
+// RingsWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/RingsWipe.glsl
+// Author: gre
+// License: MIT
+// Description: Concentric rings ripple out from the center and, one after another, each sweeps around like a clock hand in the opposite direction of its neighbors to reveal the incoming image, or fills across its width, with optional colored borders between the rings
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform int count; 
+
+uniform vec2 center; 
+
+uniform float stagger; 
+
+uniform int radial; 
+
+uniform float borderWidth; 
+
+uniform vec4 borderColor; 
+
+uniform float smoothness; 
+
+const float PI = 3.141592653589793;
+
+const float AA = 0.0015;
+
+float ringProgress(float i, float k, float d, float t) {
+  return clamp((t - i * k * d) / d, 0.0, 1.0);
+}
+
+float ringMask(float i, float lp, float w, float rad, float a, float s) {
+  bool odd = mod(i, 2.0) > 0.5;
+  if ((radial != 0)) {
+    
+    
+    
+    float e = s / w;
+    float f = mix(-e, 1.0 + e, lp);
+    float x = clamp((rad - i * w) / w, 0.0, 1.0);
+    float dist = (odd ? f - (1.0 - x) : f - x) * w;
+    return smoothstep(-s, s, dist);
+  }
+  
+  
+  
+  
+  float aa = odd ? 1.0 - a : a;
+  float arc = 2.0 * PI * max(rad, s);
+  float e = s / arc;
+  float lo = mix(e, -e, lp);
+  float hi = mix(-e, 1.0 + e, lp);
+  float dist = max(min(aa - lo, hi - aa), min(aa - 1.0 - lo, hi - aa + 1.0));
+  return smoothstep(-s, s, dist * arc);
+}
+
+vec4 transition(vec2 uv) {
+  vec4 a = getFromColor(uv);
+  vec4 b = getToColor(uv);
+  if (progress <= 0.0) return a;
+  if (progress >= 1.0) return b;
+
+  float n = float(count < 1 ? 1 : count);
+  
+  vec2 p = (uv - center) * vec2(ratio, 1.0);
+  
+  vec2 far = max(center, 1.0 - center) * vec2(ratio, 1.0);
+  float R = length(far) + AA;
+  float w = R / n;
+  float rad = length(p);
+  float turn = rad > 0.0 ? fract(atan(p.x, p.y) / (2.0 * PI)) : 0.0;
+  float s = max(min(smoothness, 0.25 * w), AA);
+  float t = mix(progress, progress * progress * (3.0 - 2.0 * progress), 0.35);
+  float k = clamp(stagger, 0.0, 1.0);
+  float d = 1.0 / (1.0 + k * (n - 1.0));
+
+  
+  float j = floor(rad / w + 0.5);
+  float inner = clamp(j - 1.0, 0.0, n - 1.0);
+  float outer = clamp(j, 0.0, n - 1.0);
+  float li = ringProgress(inner, k, d, t);
+  float lo = ringProgress(outer, k, d, t);
+  float m = mix(
+    ringMask(inner, li, w, rad, turn, s),
+    ringMask(outer, lo, w, rad, turn, s),
+    smoothstep(-AA, AA, rad - j * w)
+  );
+
+  
+  vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
+
+  
+  
+  if (borderWidth > 0.0 && j >= 1.0 && j <= n - 1.0) {
+    float on = min(1.0, 4.0 * li * (1.0 - lo));
+    
+    float hw = min(0.5 * borderWidth, 0.5 * w - AA);
+    float line = (1.0 - smoothstep(hw - AA, hw + AA, abs(rad - j * w)))
+      * min(1.0, borderWidth / (2.0 * AA));
+    float o = borderColor.a * line * on;
+    c = vec4(borderColor.rgb * o, o) + c * (1.0 - o);
+  }
+  return c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

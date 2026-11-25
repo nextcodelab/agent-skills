@@ -1,0 +1,48 @@
+{
+  "id": "typewriter",
+  "name": "Typewriter",
+  "version": 1,
+  "description": "Editable animated text style: Typewriter.",
+  "tags": [
+    "typewriter",
+    "documentary",
+    "reveal"
+  ],
+  "sampleText": "THE DETAILS MATTER",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Consolas, monospace",
+    "fontSize": 68,
+    "fontWeight": 700,
+    "color": "#D8FFB0",
+    "accentColor": "#8FE85B",
+    "letterSpacing": 2,
+    "strokeColor": "#0A1308",
+    "strokeWidth": 2
+  },
+  "shape": {
+    "background": "#142012",
+    "padding": "18px 30px",
+    "borderRadius": 10
+  },
+  "animation": {
+    "type": "typewriter",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

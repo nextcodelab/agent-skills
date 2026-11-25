@@ -1,0 +1,30 @@
+{
+    "id": "karaoke-lyrics",
+    "description": "Word-synced karaoke captions for music or lyric-led clips.",
+    "tags": [
+        "karaoke",
+        "lyrics",
+        "word-sync",
+        "bold"
+    ],
+    "font_name": "Arial",
+    "font_size": 64,
+    "base_color_ass": "&H00FFFFFF&",
+    "highlight_color_ass": "&H0046BEF7&",
+    "highlight_override_ass": "&H46BEF7&",
+    "outline_color_ass": "&H002F2114&",
+    "back_color_ass": "&H64000000&",
+    "bold": true,
+    "outline": 5,
+    "shadow": 2,
+    "alignment": 2,
+    "margin_left": 64,
+    "margin_right": 64,
+    "margin_vertical": 460,
+    "max_words": 5,
+    "max_caption_seconds": 2.5,
+    "entrance": "none",
+    "fade_in_ms": 0,
+    "fade_out_ms": 0,
+    "highlight_mode": "karaoke"
+}

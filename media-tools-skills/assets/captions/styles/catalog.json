@@ -1,0 +1,7 @@
+[
+ {"id":"podcast-gold-closeup","file":"podcast-gold-closeup.json","tags":["podcast","gold","uppercase","word-sync"],"languages":["en","tl","taglish"],"animation":"active-word"},
+ {"id":"podcast-clean-highlight","file":"podcast-clean-highlight.json","tags":["podcast","clean","keyword-highlight","lower-third"],"languages":["en","tl","taglish"],"animation":"fade"},
+ {"id":"karaoke-lyrics","file":"karaoke-lyrics.json","tags":["karaoke","lyrics","word-sync","bold"],"languages":["en","tl","taglish"],"animation":"active-word"},
+ {"id":"minimal-white","file":"minimal-white.json","tags":["minimal","clean","interview","low-distraction"],"languages":["en","tl","taglish"],"animation":"none"},
+ {"id":"pop-word-highlight","file":"pop-word-highlight.json","tags":["social","punchy","keyword-highlight","pop"],"languages":["en","tl","taglish"],"animation":"pop"}
+]

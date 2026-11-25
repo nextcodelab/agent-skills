@@ -1,0 +1,48 @@
+{
+  "id": "glitch-caption",
+  "name": "Glitch Caption",
+  "version": 1,
+  "description": "Editable animated text style: Glitch Caption.",
+  "tags": [
+    "glitch",
+    "bold",
+    "music"
+  ],
+  "sampleText": "THAT CHANGED EVERYTHING",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Arial, sans-serif",
+    "fontSize": 74,
+    "fontWeight": 900,
+    "color": "#FFFFFF",
+    "accentColor": "#FF3B58",
+    "letterSpacing": 1,
+    "strokeColor": "#00D9FF",
+    "strokeWidth": 2
+  },
+  "shape": {
+    "background": "#15151B",
+    "padding": "18px 30px",
+    "borderRadius": 8
+  },
+  "animation": {
+    "type": "glitch",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

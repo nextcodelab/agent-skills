@@ -1,0 +1,48 @@
+{
+  "id": "impact-pop",
+  "name": "Impact Pop",
+  "version": 1,
+  "description": "Editable animated text style: Impact Pop.",
+  "tags": [
+    "hook",
+    "bold",
+    "reaction"
+  ],
+  "sampleText": "WAIT FOR IT",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Impact, Arial, sans-serif",
+    "fontSize": 104,
+    "fontWeight": 900,
+    "color": "#FFFFFF",
+    "accentColor": "#FFD43B",
+    "letterSpacing": 1,
+    "strokeColor": "#161616",
+    "strokeWidth": 5
+  },
+  "shape": {
+    "background": "#E94735",
+    "padding": "18px 30px",
+    "borderRadius": 20
+  },
+  "animation": {
+    "type": "pop",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

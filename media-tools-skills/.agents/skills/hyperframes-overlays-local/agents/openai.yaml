@@ -1,0 +1,4 @@
+interface:
+  display_name: "HyperFrames Overlays Local"
+  short_description: "Add animated local stickers to finished clips"
+  default_prompt: "Use $hyperframes-overlays-local to add context-matched animated popups to my videos locally."

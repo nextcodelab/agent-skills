@@ -1,0 +1,82 @@
+// PaperTear — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/PaperTear.glsl
+// Author: gre
+// License: MIT
+// Description: The outgoing image tears in two along a ragged line, and the halves are pulled apart to reveal the incoming one
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float roughness; 
+
+uniform float tilt; 
+
+uniform float rim; 
+
+uniform vec4 paper; 
+
+uniform vec4 shadow; 
+
+float tri (float x) {
+  return abs(fract(x) - 0.5) - 0.25;
+}
+
+float meander (float y) {
+  return 0.5 * ratio + roughness * (0.5 * sin(y * 4.7 + 1.3) + 0.25 * sin(y * 11.3 + 4.1));
+}
+
+float tear (float y) {
+  return meander(y) + roughness * (0.1 * sin(y * 29.0 + 0.7) + 0.35 * tri(y * 19.0 + sin(y * 7.0)) + 0.12 * tri(y * 47.0 + 0.6 * sin(y * 13.0)));
+}
+
+float fibers (float y, float seed) {
+  return rim * (0.7 + 0.3 * sin(y * 37.0 + seed) + 0.4 * tri(y * 83.0 + seed));
+}
+
+vec2 unfold (vec2 q, float away, float lean) {
+  return vec2(q.x + away + lean * q.y, q.y);
+}
+
+vec4 torn (vec4 bg, vec4 col, float e, float limit, float aa) {
+  vec4 c = vec4(mix(col.rgb, paper.rgb, clamp(0.5 + e / aa, 0.0, 1.0) * paper.a), col.a);
+  return mix(bg, c, clamp(0.5 - (e - limit) / aa, 0.0, 1.0));
+}
+
+vec4 transition (vec2 uv) {
+  float p = progress;
+  float away = p * p * (0.5 * ratio + 0.1 + roughness + 2.0 * rim); 
+  float lean = tilt * p * (2.0 - p);
+  float fiber = smoothstep(0.0, 0.15, p); 
+  float aa = 0.002 * fiber + 1e-6;
+  vec2 q = vec2(uv.x * ratio, uv.y);
+  vec2 l = unfold(q, away, lean);
+  vec2 r = unfold(vec2(ratio - q.x, q.y), away, lean);
+  float el = l.x - tear(l.y); 
+  float er = r.x - (ratio - tear(r.y)); 
+  
+  vec2 sq = q - vec2(0.01, 0.0);
+  float dl = unfold(sq, away, lean).x - meander(sq.y);
+  float dr = unfold(vec2(ratio - sq.x, sq.y), away, lean).x - (ratio - meander(sq.y));
+  vec4 to = getToColor(uv);
+  float sh = shadow.a * (1.0 - smoothstep(-0.02, 0.08, min(dl, dr)));
+  vec4 c = vec4(mix(to.rgb, shadow.rgb, sh), to.a);
+  
+  if (r.x >= 0.0) {
+    c = torn(c, getFromColor(vec2(1.0 - r.x / ratio, r.y)), er, fibers(r.y, 2.0) * 1.5 * fiber, aa);
+  }
+  if (l.x >= 0.0) {
+    c = torn(c, getFromColor(vec2(l.x / ratio, l.y)), el, fibers(l.y, 0.0) * fiber, aa);
+  }
+  return c;
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

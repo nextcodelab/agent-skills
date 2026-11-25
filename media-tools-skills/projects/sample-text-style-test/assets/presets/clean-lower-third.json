@@ -1,0 +1,48 @@
+{
+  "id": "clean-lower-third",
+  "name": "Clean Lower Third",
+  "version": 1,
+  "description": "Editable animated text style: Clean Lower Third.",
+  "tags": [
+    "lower-third",
+    "interview",
+    "clean"
+  ],
+  "sampleText": "NATALIA  ·  CREATOR",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Segoe UI, Arial, sans-serif",
+    "fontSize": 60,
+    "fontWeight": 700,
+    "color": "#FFFFFF",
+    "accentColor": "#65E2CE",
+    "letterSpacing": 1,
+    "strokeColor": "transparent",
+    "strokeWidth": 0
+  },
+  "shape": {
+    "background": "#101820E8",
+    "padding": "18px 30px",
+    "borderRadius": 16
+  },
+  "animation": {
+    "type": "slide-left",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

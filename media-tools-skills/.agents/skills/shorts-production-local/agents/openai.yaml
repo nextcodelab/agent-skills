@@ -1,0 +1,4 @@
+interface:
+  display_name: "Shorts Production Local"
+  short_description: "Batch edit vertical Shorts on this computer"
+  default_prompt: "Use $shorts-production-local to turn my source video into captioned vertical Shorts with local tools."

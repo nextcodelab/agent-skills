@@ -1,0 +1,74 @@
+// SpotlightWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/SpotlightWipe.glsl
+// Author: gre
+// License: MIT
+// Description: The stage lights go down on the outgoing image and a soft oval spotlight searches across it along a curved path, comes to rest and lights the incoming image inside it, then widens until the stage lights come back up on the incoming image
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform vec2 center; 
+
+uniform float size; 
+
+uniform float darkness; 
+
+uniform vec3 warmth; 
+
+const float FLAT = 0.72;
+
+const float LIT = 0.74;
+
+vec2 path(float t, vec2 c) {
+  vec2 a = vec2(0.08, 0.3);
+  vec2 b = vec2(0.35, 1.15);
+  vec2 d = vec2(1.05, 0.95);
+  float s = 1.0 - t;
+  return s * s * s * a + 3.0 * s * s * t * b + 3.0 * s * t * t * d + t * t * t * c;
+}
+
+vec4 transition(vec2 uv) {
+  vec2 asp = vec2(ratio, 1.0);
+  float p = progress;
+
+  
+  
+  float t = clamp(p / 0.5, 0.0, 1.0);
+  t = t * t * (3.0 - 2.0 * t);
+  vec2 c = path(t, center);
+
+  
+  vec2 far = max(center, 1.0 - center) * asp;
+  float full = length(vec2(far.x, far.y / FLAT)) / LIT;
+  float g = smoothstep(0.44, 1.0, p);
+  float radius = mix(0.5 * size, full, g * (0.3 + 0.7 * g));
+
+  
+  vec2 q = (uv - c) * asp;
+  float r = length(vec2(q.x, q.y / FLAT)) / radius;
+
+  
+  float core = 1.0 - smoothstep(0.72, 1.08, r);
+  float ring = (r - 0.9) / 0.09;
+  float spot = max(core * (1.0 - 0.1 * r * r), 0.12 * (1.0 - smoothstep(0.9, 2.4, r))) + 0.16 * exp(-ring * ring);
+
+  
+  float s = darkness * smoothstep(0.0, 0.18, p) * (1.0 - smoothstep(0.72, 1.0, p));
+  vec3 light = 1.0 - s + s * spot * warmth;
+
+  
+  float lit = smoothstep(0.42, 0.58, p) * (1.0 - smoothstep(LIT, 1.0, r));
+  vec4 col = mix(getFromColor(uv), getToColor(uv), lit);
+  return vec4(col.rgb * light, col.a);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

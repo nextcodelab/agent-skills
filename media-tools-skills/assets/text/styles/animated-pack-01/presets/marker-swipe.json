@@ -1,0 +1,48 @@
+{
+  "id": "marker-swipe",
+  "name": "Marker Swipe",
+  "version": 1,
+  "description": "Editable animated text style: Marker Swipe.",
+  "tags": [
+    "highlight",
+    "education",
+    "callout"
+  ],
+  "sampleText": "KEY POINT",
+  "editable": [
+    "text",
+    "fontFamily",
+    "fontSize",
+    "color",
+    "accentColor",
+    "background",
+    "duration",
+    "position"
+  ],
+  "typography": {
+    "fontFamily": "Arial, sans-serif",
+    "fontSize": 92,
+    "fontWeight": 900,
+    "color": "#171717",
+    "accentColor": "#FFE24A",
+    "letterSpacing": 0,
+    "strokeColor": "transparent",
+    "strokeWidth": 0
+  },
+  "shape": {
+    "background": "transparent",
+    "padding": "18px 30px",
+    "borderRadius": 4
+  },
+  "animation": {
+    "type": "marker-wipe",
+    "duration": 0.55,
+    "ease": "power3.out",
+    "outDuration": 0.22,
+    "seekable": true
+  },
+  "safeArea": {
+    "horizontal": 0.08,
+    "vertical": 0.12
+  }
+}

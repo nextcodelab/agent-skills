@@ -1,0 +1,98 @@
+// Snapshot — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/Snapshot.glsl
+// Author: gre
+// License: MIT
+// Description: A camera flash freezes the outgoing image into a printed photo with a white border, which shrinks, tilts and drops out of the frame, revealing the incoming image behind it
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float tilt; 
+
+uniform float border; 
+
+uniform float flash; 
+
+uniform float shadow; 
+
+uniform vec4 borderColor; 
+
+const float SHRINK = 0.24; 
+const float RADIUS = 0.008; 
+const float AA = 0.0015; 
+
+float roundedBox(vec2 q, vec2 b, float r) {
+  vec2 d = abs(q) - b + r;
+  return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
+}
+
+vec4 premultiply(vec4 c) {
+  return vec4(c.rgb * c.a, c.a);
+}
+
+vec4 transition(vec2 uv) {
+  float p = progress;
+  vec2 asp = vec2(ratio, 1.0);
+  vec2 q = (uv - 0.5) * asp;
+  vec2 halfImage = 0.5 * asp;
+  vec2 halfCard = halfImage + border;
+
+  
+  float k = smoothstep(0.05, 0.4, p);
+  float t = clamp((p - 0.3) / 0.7, 0.0, 1.0);
+  float fall = t * t;
+  float s = 1.0 - SHRINK * k;
+  float a = -tilt * (0.12 * k + 0.88 * fall);
+  
+  float bound = (abs(sin(tilt)) * halfCard.x + abs(cos(tilt)) * halfCard.y) * (1.0 - SHRINK);
+  
+  float lift = 0.035 * k * (1.0 - fall);
+  vec2 center = vec2(0.08 * fall, lift - (0.5 + bound + 0.1) * fall);
+
+  float rad = RADIUS * k;
+
+  float ca = cos(a), sa = sin(a);
+  mat2 unrotate = mat2(ca, -sa, sa, ca);
+
+  
+  vec4 col = getToColor(uv);
+  float sh = shadow * k;
+  if (sh > 0.0) {
+    vec2 rs = unrotate * (q - center - vec2(0.012, -0.022) * k) / s;
+    float ds = roundedBox(rs, halfCard, rad) * s;
+    float blur = 0.035 * s;
+    col.rgb *= 1.0 - sh * (1.0 - smoothstep(-blur, blur, ds));
+  }
+  col = premultiply(col);
+
+  
+  vec2 r = unrotate * (q - center) / s;
+  float dCard = roundedBox(r, halfCard, rad) * s;
+  float dImage = roundedBox(r, halfImage, 0.0) * s;
+  
+  float cardCover = clamp(1.5 - dCard / AA, 0.0, 1.0);
+  float imageCover = clamp(1.5 - dImage / AA, 0.0, 1.0);
+  
+  vec4 photo = premultiply(getFromColor(clamp(r / asp + 0.5, 0.0, 1.0)));
+  vec4 paper = premultiply(borderColor);
+  vec4 card = mix(paper + col * (1.0 - paper.a), photo, imageCover);
+  col = mix(col, card, cardCover);
+  if (col.a <= 0.0) return vec4(0.0);
+  col.rgb /= col.a;
+
+  
+  float f = flash * smoothstep(0.0, 0.05, p) * (1.0 - smoothstep(0.05, 0.3, p));
+  col.rgb = 1.0 - (1.0 - col.rgb) * (1.0 - f);
+  return col;
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

@@ -1,0 +1,89 @@
+﻿[Script Info]
+Title: Local timed speech captions
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Default,Arial,62,&H00FFFFFF,&H0046BEF7,&H002F2114,&H64000000,1,0,0,0,100,100,0,0,1,5,2,2,72,72,510,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.35,0:00:03.28,Default,,0,0,0,,{\fad(70,70)}What's a\Nstory in
+Dialogue: 0,0:00:03.28,0:00:06.60,Default,,0,0,0,,{\fad(70,70)}your career\Nor about
+Dialogue: 0,0:00:06.60,0:00:08.81,Default,,0,0,0,,{\fad(70,70)}any artist that\Nyou'll never
+Dialogue: 0,0:00:08.81,0:00:09.68,Default,,0,0,0,,{\fad(70,70)}forget?
+Dialogue: 0,0:00:09.68,0:00:12.13,Default,,0,0,0,,{\fad(70,70)}I mean, I'll\Ntell you
+Dialogue: 0,0:00:12.13,0:00:15.02,Default,,0,0,0,,{\fad(70,70)}one that's probably\Nlike dear
+Dialogue: 0,0:00:15.02,0:00:16.68,Default,,0,0,0,,{\fad(70,70)}to my heart\Nis that
+Dialogue: 0,0:00:16.68,0:00:20.20,Default,,0,0,0,,{\fad(70,70)}like I\Nremember
+Dialogue: 0,0:00:20.20,0:00:23.56,Default,,0,0,0,,{\fad(70,70)}being like\N13.
+Dialogue: 0,0:00:23.56,0:00:25.83,Default,,0,0,0,,{\fad(70,70)}I used to\Ngo down
+Dialogue: 0,0:00:25.83,0:00:28.97,Default,,0,0,0,,{\fad(70,70)}to South\NStreet after
+Dialogue: 0,0:00:28.97,0:00:30.62,Default,,0,0,0,,{\fad(70,70)}school.
+Dialogue: 0,0:00:30.62,0:00:31.27,Default,,0,0,0,,{\fad(70,70)}I think I\Nused to
+Dialogue: 0,0:00:31.27,0:00:32.25,Default,,0,0,0,,{\fad(70,70)}go down there\Nto like
+Dialogue: 0,0:00:32.25,0:00:33.20,Default,,0,0,0,,{\fad(70,70)}buy mix\Ntapes.
+Dialogue: 0,0:00:33.20,0:00:35.01,Default,,0,0,0,,{\fad(70,70)}And there was\Nan {\c&H46BEF7&\b1}arcade{\c&HFFFFFF&\b1}
+Dialogue: 0,0:00:35.01,0:00:36.15,Default,,0,0,0,,{\fad(70,70)}that I used\Nto go
+Dialogue: 0,0:00:36.15,0:00:37.44,Default,,0,0,0,,{\fad(70,70)}to and when\NI used
+Dialogue: 0,0:00:37.44,0:00:39.22,Default,,0,0,0,,{\fad(70,70)}to go into\Nthe {\c&H46BEF7&\b1}arcade,{\c&HFFFFFF&\b1}
+Dialogue: 0,0:00:39.22,0:00:40.39,Default,,0,0,0,,{\fad(70,70)}it was just,\Nyou know,
+Dialogue: 0,0:00:40.39,0:00:43.11,Default,,0,0,0,,{\fad(70,70)}kind of overweight,\Nheavy said
+Dialogue: 0,0:00:43.11,0:00:43.71,Default,,0,0,0,,{\fad(70,70)}drummer.
+Dialogue: 0,0:00:43.71,0:00:44.62,Default,,0,0,0,,{\fad(70,70)}His name used\Nto be
+Dialogue: 0,0:00:44.62,0:00:45.79,Default,,0,0,0,,{\fad(70,70)}Brother Question.
+Dialogue: 0,0:00:45.79,0:00:47.53,Default,,0,0,0,,{\fad(70,70)}They called him\NBrother Question
+Dialogue: 0,0:00:47.53,0:00:48.35,Default,,0,0,0,,{\fad(70,70)}and we used\Nto play
+Dialogue: 0,0:00:48.35,0:00:49.40,Default,,0,0,0,,{\fad(70,70)}video games\Ntogether.
+Dialogue: 0,0:00:49.40,0:00:50.34,Default,,0,0,0,,{\fad(70,70)}And he was\Na little
+Dialogue: 0,0:00:50.34,0:00:51.28,Default,,0,0,0,,{\fad(70,70)}older than\Nhim.
+Dialogue: 0,0:00:51.28,0:00:52.84,Default,,0,0,0,,{\fad(70,70)}He was like\N17, 18,
+Dialogue: 0,0:00:52.84,0:00:53.95,Default,,0,0,0,,{\fad(70,70)}but he used\Nto always
+Dialogue: 0,0:00:53.95,0:00:55.44,Default,,0,0,0,,{\fad(70,70)}have these headphones\Nand he'd
+Dialogue: 0,0:00:55.44,0:00:56.39,Default,,0,0,0,,{\fad(70,70)}be like, yo,\Nyou've got
+Dialogue: 0,0:00:56.39,0:00:57.75,Default,,0,0,0,,{\fad(70,70)}to listen to\Nthis {\c&H46BEF7&\b1}Black{\c&HFFFFFF&\b1}
+Dialogue: 0,0:00:57.75,0:00:58.60,Default,,0,0,0,,{\fad(70,70)}{\c&H46BEF7&\b1}Thought{\c&HFFFFFF&\b1} raps.
+Dialogue: 0,0:00:58.60,0:00:59.38,Default,,0,0,0,,{\fad(70,70)}Like, you've got\Nto listen
+Dialogue: 0,0:00:59.38,0:01:00.52,Default,,0,0,0,,{\fad(70,70)}to these {\c&H46BEF7&\b1}Black{\c&HFFFFFF&\b1}\N{\c&H46BEF7&\b1}Thought{\c&HFFFFFF&\b1} raps.
+Dialogue: 0,0:01:00.52,0:01:01.61,Default,,0,0,0,,{\fad(70,70)}And he would\Nlike play
+Dialogue: 0,0:01:01.61,0:01:03.08,Default,,0,0,0,,{\fad(70,70)}me these {\c&H46BEF7&\b1}Black{\c&HFFFFFF&\b1}\N{\c&H46BEF7&\b1}Thought{\c&HFFFFFF&\b1} raps.
+Dialogue: 0,0:01:03.08,0:01:05.13,Default,,0,0,0,,{\fad(70,70)}And like he\Nwas explaining
+Dialogue: 0,0:01:05.13,0:01:06.38,Default,,0,0,0,,{\fad(70,70)}to me how\Nhe was
+Dialogue: 0,0:01:06.38,0:01:07.61,Default,,0,0,0,,{\fad(70,70)}like he was\Nin his
+Dialogue: 0,0:01:07.61,0:01:08.80,Default,,0,0,0,,{\fad(70,70)}G Rap bag\Nand how
+Dialogue: 0,0:01:08.80,0:01:10.47,Default,,0,0,0,,{\fad(70,70)}fire he was\Nand like,
+Dialogue: 0,0:01:10.47,0:01:11.42,Default,,0,0,0,,{\fad(70,70)}you know, all\Nthese things
+Dialogue: 0,0:01:11.42,0:01:12.51,Default,,0,0,0,,{\fad(70,70)}that they were\Nabout to
+Dialogue: 0,0:01:12.51,0:01:14.19,Default,,0,0,0,,{\fad(70,70)}do with this\Ngroup and,
+Dialogue: 0,0:01:14.19,0:01:15.52,Default,,0,0,0,,{\fad(70,70)}you know, the\Nsquare roots
+Dialogue: 0,0:01:15.52,0:01:16.16,Default,,0,0,0,,{\fad(70,70)}and we're going\Nto get
+Dialogue: 0,0:01:16.16,0:01:17.24,Default,,0,0,0,,{\fad(70,70)}our record\Ndeal.
+Dialogue: 0,0:01:17.24,0:01:18.54,Default,,0,0,0,,{\fad(70,70)}And, you know,\Nwe're going
+Dialogue: 0,0:01:18.54,0:01:19.46,Default,,0,0,0,,{\fad(70,70)}on tour and\Ndoing all
+Dialogue: 0,0:01:19.46,0:01:20.24,Default,,0,0,0,,{\fad(70,70)}these stuff.
+Dialogue: 0,0:01:20.24,0:01:21.36,Default,,0,0,0,,{\fad(70,70)}And at the\Ntime I
+Dialogue: 0,0:01:21.36,0:01:23.18,Default,,0,0,0,,{\fad(70,70)}was like a\Nninth grader,
+Dialogue: 0,0:01:23.18,0:01:24.79,Default,,0,0,0,,{\fad(70,70)}I was in\Nschool and,
+Dialogue: 0,0:01:24.79,0:01:26.48,Default,,0,0,0,,{\fad(70,70)}you know, I\Nwas familiar
+Dialogue: 0,0:01:26.48,0:01:28.29,Default,,0,0,0,,{\fad(70,70)}with square roots\Nbecause they
+Dialogue: 0,0:01:28.29,0:01:29.46,Default,,0,0,0,,{\fad(70,70)}had the song\Ncalled Pass
+Dialogue: 0,0:01:29.46,0:01:30.12,Default,,0,0,0,,{\fad(70,70)}the Popcorn.
+Dialogue: 0,0:01:30.12,0:01:32.29,Default,,0,0,0,,{\fad(70,70)}And, you know,\Nliterally everything
+Dialogue: 0,0:01:32.29,0:01:33.42,Default,,0,0,0,,{\fad(70,70)}that he told\Nme in
+Dialogue: 0,0:01:33.42,0:01:34.76,Default,,0,0,0,,{\fad(70,70)}that {\c&H46BEF7&\b1}arcade{\c&HFFFFFF&\b1} pretty\Nmuch came
+Dialogue: 0,0:01:34.76,0:01:35.36,Default,,0,0,0,,{\fad(70,70)}true.
+Dialogue: 0,0:01:35.36,0:01:36.86,Default,,0,0,0,,{\fad(70,70)}And that was\Nmy motivation
+Dialogue: 0,0:01:36.86,0:01:38.62,Default,,0,0,0,,{\fad(70,70)}and my inspiration\Nto really
+Dialogue: 0,0:01:38.62,0:01:40.08,Default,,0,0,0,,{\fad(70,70)}know and to\Nunderstand and
+Dialogue: 0,0:01:40.08,0:01:42.04,Default,,0,0,0,,{\fad(70,70)}realize that, like,\Nwow, this
+Dialogue: 0,0:01:42.04,0:01:43.71,Default,,0,0,0,,{\fad(70,70)}these dreams are\Nthese, you
+Dialogue: 0,0:01:43.71,0:01:45.29,Default,,0,0,0,,{\fad(70,70)}know, ideas of\Nmaking it
+Dialogue: 0,0:01:45.29,0:01:46.66,Default,,0,0,0,,{\fad(70,70)}in the music\Nbusiness can
+Dialogue: 0,0:01:46.66,0:01:47.80,Default,,0,0,0,,{\fad(70,70)}really happen.
+Dialogue: 0,0:01:47.80,0:01:48.88,Default,,0,0,0,,{\fad(70,70)}And it was\Nbecause of
+Dialogue: 0,0:01:48.88,0:01:50.00,Default,,0,0,0,,{\fad(70,70)}Questlove.
+Dialogue: 0,0:01:50.00,0:01:50.60,Default,,0,0,0,,{\fad(70,70)}That's awesome.

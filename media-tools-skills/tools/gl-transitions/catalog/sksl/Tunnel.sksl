@@ -1,0 +1,55 @@
+// Tunnel — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/Tunnel.glsl
+// Author: gre
+// License: MIT
+// Description: The camera flies down a tunnel lined with the outgoing image toward the incoming one, which opens at its far end and grows to fill the frame
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float speed; 
+
+uniform float twist; 
+
+vec2 rotate(vec2 v, float a) {
+  float c = cos(a);
+  float s = sin(a);
+  return vec2(c * v.x - s * v.y, s * v.x + c * v.y);
+}
+
+vec4 transition(vec2 uv) {
+  vec2 aspect = vec2(ratio, 1.0);
+  vec2 c = (uv - 0.5) * aspect;
+  float r = length(c);
+  
+  
+  
+  
+  float R = length(0.5 * aspect);
+  float far = 1.0 + speed;
+  
+  float e = mix(progress, progress * progress * (3.0 - 2.0 * progress), 0.7);
+  float d = pow(far, 1.0 - e);
+  float t = far - d; 
+  
+  float k = r * d < R ? d / far : R / (R + t * r); 
+  float a = twist * min(t * r / R, t / d); 
+  vec4 walls = getFromColor(0.5 + rotate(c * k, a) / aspect);
+  walls.rgb *= 0.4 + 0.6 * sqrt(k); 
+  
+  float open = smoothstep(0.0, 0.6, progress);
+  vec2 q = 0.5 + (uv - 0.5) * d / max(open, 1e-4);
+  vec2 inside = step(0.0, q) * step(q, vec2(1.0));
+  return mix(walls, getToColor(q), inside.x * inside.y * step(r * d, R));
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

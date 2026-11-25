@@ -1,0 +1,2 @@
+[1:v]format=rgba,fade=t=in:st=0.18:d=0.28:alpha=1,fade=t=out:st=4.15:d=0.40:alpha=1[ov];
+[0:v][ov]overlay=x=60:y='if(lt(t,0.25),1920,if(lt(t,0.75),1920-440*(t-0.25)/0.5,1480))':enable='between(t,0.18,4.55)':eof_action=pass:shortest=1,format=yuv420p[v]

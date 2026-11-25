@@ -1,0 +1,96 @@
+// BlockCover — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/BlockCover.glsl
+// Author: gre
+// License: MIT
+// Description: Blocks of a solid color pop in at random over the outgoing image until they cover the frame, then pop out in another random order to show the incoming image
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform int blocks; 
+
+uniform vec4 color; 
+
+uniform float pop; 
+
+uniform float smoothness; 
+
+const float duration = 0.14; 
+const float cut = 0.45; 
+const float hold = 0.02;
+
+float hash (vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+
+float backOut (float t, float c) {
+  float u = t - 1.0;
+  return 1.0 + (c + 1.0) * u * u * u + c * u * u;
+}
+
+vec2 timing (vec2 cell) {
+  return vec2(
+    (cut - hold - duration) * hash(cell + 0.5),
+    cut + hold + (1.0 - cut - hold - duration) * hash(cell + 71.7));
+}
+
+float blockScale (vec2 cell, float c) {
+  vec2 t = timing(cell);
+  float a = clamp((progress - t.x) / duration, 0.0, 1.0);
+  float b = clamp((progress - t.y) / duration, 0.0, 1.0);
+  
+  return b > 0.0 ? (1.0 - b) * (1.0 - b) : backOut(a, c);
+}
+
+float coverage (vec2 q, vec2 cell, float s, float sm) {
+  
+  float h = s * (0.5 + sm);
+  vec2 d = abs(q - cell - 0.5);
+  return s > 0.0 ? 1.0 - smoothstep(h - sm, h, max(d.x, d.y)) : 0.0;
+}
+
+vec4 transition (vec2 uv) {
+  float nLong = max(float(blocks), 1.0);
+  vec2 n = ratio >= 1.0
+    ? vec2(nLong, max(1.0, floor(nLong / ratio + 0.5)))
+    : vec2(max(1.0, floor(nLong * ratio + 0.5)), nLong);
+  vec2 q = uv * n;
+  vec2 cell = floor(q);
+  float sm = max(smoothness, 0.001);
+  float c = 2.0 * clamp(pop, 0.0, 1.0);
+  float s = blockScale(cell, c);
+  if (s >= 1.0) return color;
+  float cover = coverage(q, cell, s, sm);
+  
+  float u = -2.0 * c / (3.0 * (c + 1.0));
+  float reach = backOut(1.0 + u, c) * (0.5 + sm);
+  vec2 o = abs(q - cell - 0.5);
+  if (max(o.x, o.y) > 1.0 - reach) {
+    for (int j = -1; j <= 1; j++) {
+      for (int i = -1; i <= 1; i++) {
+        vec2 nb = cell + vec2(float(i), float(j));
+        vec2 inside = step(vec2(0.0), nb) * step(nb, n - 1.0);
+        if (inside.x * inside.y > 0.0 && (i != 0 || j != 0)) {
+          cover = max(cover, coverage(q, nb, blockScale(nb, c), sm));
+        }
+      }
+    }
+  }
+  
+  vec2 t = timing(cell);
+  vec4 under = progress < 0.5 * (t.x + duration + t.y) ? getFromColor(uv) : getToColor(uv);
+  return mix(under, color, cover);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

@@ -1,0 +1,64 @@
+// CurvedWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/CurvedWipe.glsl
+// Author: gre
+// License: MIT
+// Description: The outgoing image is pulled away by its middle: the wipe edge bulges into a smooth curve that leads the way, then flattens as it reaches the far side
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform vec2 direction; 
+
+uniform float curvature; 
+
+uniform float smoothness; 
+
+uniform vec4 shadow; 
+
+const float PI = 3.141592653589793;
+
+float ease (float t) {
+  return 0.5 * (t + t * t * (3.0 - 2.0 * t));
+}
+
+vec4 transition (vec2 uv) {
+  vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(0.0, 1.0);
+  vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
+  
+  float e = 0.5 * (abs(dir.x) * ratio + abs(dir.y));
+  float w = 0.5 * (abs(dir.y) * ratio + abs(dir.x));
+  vec2 across = vec2(-dir.y, dir.x);
+  float d = dot(p, dir);
+  
+  
+  float x = clamp(dot(p, across) / w, -1.0, 1.0);
+  float s = max(smoothness, 0.001);
+  
+  
+  float k = clamp(curvature, 0.0, 1.0) * min(1.0, w / e) * (1.0 - x * x);
+  float t = progress + k * progress * (1.0 - progress);
+  float travel = 2.0 * (e + s);
+  float edge = -e - s + travel * ease(t);
+  float side = -e - s + travel * ease(progress);
+  float m = 1.0 - smoothstep(-s, s, d - edge);
+  
+  float lift = edge - side;
+  float spread = 0.012 + 0.25 * lift;
+  
+  vec4 to = getToColor(uv);
+  vec2 caster = clamp((p + (edge - d) * dir) / vec2(ratio, 1.0) + 0.5, 0.0, 1.0);
+  float sh = shadow.a * sin(PI * progress) * exp(-max(edge - d, 0.0) / spread) * m * getFromColor(caster).a * to.a;
+  to.rgb = mix(to.rgb, shadow.rgb, sh);
+  return mix(getFromColor(uv), to, m);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

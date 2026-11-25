@@ -1,0 +1,77 @@
+// GravityLens — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/GravityLens.glsl
+// Author: gre
+// License: MIT
+// Description: A black disk appears and grows, bending the outgoing image around it like a heavy mass bends light: the image is stretched into a bright ring at the disk's edge and swallowed until the frame is black, then the disk shrinks back, unbending the incoming image
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform vec2 center; 
+
+uniform float strength; 
+
+uniform float glow; 
+
+uniform vec4 hole; 
+
+const float OVERSHOOT = 0.12;
+
+const float PEAK = 0.55;
+
+const float AA = 0.002;
+
+const vec3 WARM = vec3(1.0, 0.86, 0.68);
+
+vec2 mirrored(vec2 v) {
+  vec2 m = mod(v, 2.0);
+  return mix(m, 2.0 - m, step(1.0, m));
+}
+
+vec4 transition(vec2 uv) {
+  
+  bool swallowing = progress < PEAK;
+  float u = swallowing ? progress / PEAK : (1.0 - progress) / (1.0 - PEAK);
+  float u2 = u * u;
+  float k = u2 * (0.6 + 0.4 * u2);
+
+  
+  vec2 aspect = vec2(ratio, 1.0);
+  vec2 far = max(center, 1.0 - center) * aspect;
+  float rh = length(far) * (1.0 + OVERSHOOT) * k;
+  
+  float re = rh * (1.0 + max(strength, 0.0));
+
+  vec2 d = (uv - center) * aspect;
+  float r = max(length(d), 1e-5);
+  
+  vec2 q = mirrored(center + d * (1.0 - re * re / (r * r)) / aspect);
+  vec4 c = swallowing ? getFromColor(q) : getToColor(q);
+  
+  float amount = smoothstep(0.0, 0.04, rh);
+  
+  float inner = clamp((r - rh) / (re - rh + 1e-4), 0.0, 1.0);
+  c.rgb *= 1.0 - 0.7 * amount * (1.0 - inner * inner * (3.0 - 2.0 * inner));
+
+  
+  float g = max(glow, 0.0) * amount;
+  float einstein = (r - re) / (0.3 * (re - rh) + 0.01);
+  float photon = max(r - rh, 0.0) / (0.006 + 0.012 * rh);
+  float light = g * (0.7 * exp(-einstein * einstein) + 1.6 * exp(-photon * photon));
+  c.rgb = min(c.rgb * (1.0 + light) + WARM * (0.35 * light * c.a), vec3(1.0));
+
+  
+  float cov = clamp((rh - r) / (2.0 * AA), 0.0, 1.0);
+  return mix(c, hole, cov);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

@@ -1,0 +1,77 @@
+// BandWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/BandWipe.glsl
+// Author: gre
+// License: MIT
+// Description: Alternating bands wipe in from opposite sides together and interleave like fingers, while both images stay still
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform int bands; 
+
+uniform int vertical; 
+
+uniform float smoothness; 
+
+uniform float stagger; 
+
+const float AA = 0.0015;
+
+float bandMask(float i, float n, float a, float l, float s) {
+  
+  
+  float k = (vertical != 0) ? i : n - 1.0 - i;
+  float g = clamp(stagger, 0.0, 0.95);
+  float t = clamp((progress - g * k / max(n - 1.0, 1.0)) / (1.0 - g), 0.0, 1.0);
+  t = mix(t, t * t * (3.0 - 2.0 * t), 0.5);
+  float x = mod(i, 2.0) > 0.5 ? l - a : a;
+  
+  float c = mix(-s, l + s, t);
+  return 1.0 - smoothstep(c - s, c + s, x);
+}
+
+vec4 transition(vec2 uv) {
+  if (progress <= 0.0) return getFromColor(uv);
+  if (progress >= 1.0) return getToColor(uv);
+
+  float n = float(bands < 1 ? 1 : bands);
+  
+  float along = (vertical != 0) ? uv.y : uv.x * ratio;
+  float across = (vertical != 0) ? uv.x : uv.y;
+  float l = (vertical != 0) ? 1.0 : ratio;
+  
+  float aaAcross = (vertical != 0) ? AA / ratio : AA;
+  float s = max(smoothness, AA);
+
+  float f = across * n;
+  float i = clamp(floor(f), 0.0, n - 1.0);
+  float m = bandMask(i, n, along, l, s);
+
+  
+  
+  float fr = f - i;
+  float edge = min(fr, 1.0 - fr) / n;
+  if (edge < aaAcross) {
+    float j = clamp(fr < 0.5 ? i - 1.0 : i + 1.0, 0.0, n - 1.0);
+    m = mix(bandMask(j, n, along, l, s), m, 0.5 + 0.5 * smoothstep(0.0, aaAcross, edge));
+  }
+
+  if (m <= 0.0) return getFromColor(uv);
+  if (m >= 1.0) return getToColor(uv);
+  vec4 a = getFromColor(uv);
+  vec4 b = getToColor(uv);
+  
+  vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
+  return c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

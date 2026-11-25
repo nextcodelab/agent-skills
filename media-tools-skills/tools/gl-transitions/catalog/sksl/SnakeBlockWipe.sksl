@@ -1,0 +1,53 @@
+// SnakeBlockWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/SnakeBlockWipe.glsl
+// Author: gre
+// License: MIT
+// Description: Blocks switch to the incoming image one at a time, row after row from the top (or column after column from the left), each line running the opposite way to the one before, like a snake winding across the frame
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform ivec2 grid; 
+
+uniform int vertical; 
+
+uniform float smoothness; 
+
+vec4 transition(vec2 uv) {
+  vec4 a = getFromColor(uv);
+  vec4 b = getToColor(uv);
+  if (progress <= 0.0) return a;
+  if (progress >= 1.0) return b;
+
+  vec2 g = max(vec2(grid), 1.0);
+  
+  vec2 cell = min(floor(vec2(uv.x, 1.0 - uv.y) * g), g - 1.0);
+  
+  float lines = (vertical != 0) ? g.x : g.y;
+  float len = (vertical != 0) ? g.y : g.x;
+  float line = (vertical != 0) ? cell.x : cell.y;
+  float pos = (vertical != 0) ? cell.y : cell.x;
+  
+  if (mod(line, 2.0) > 0.5) pos = len - 1.0 - pos;
+  float order = line * len + pos;
+
+  
+  float n = lines * len;
+  float w = max(smoothness, 0.001);
+  float m = clamp((progress * (n - 1.0 + w) - order) / w, 0.0, 1.0);
+
+  
+  vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
+  return c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

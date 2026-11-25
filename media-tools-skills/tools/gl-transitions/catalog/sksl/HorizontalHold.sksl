@@ -1,0 +1,74 @@
+// HorizontalHold — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/HorizontalHold.glsl
+// Author: gre
+// License: MIT
+// Description: The picture loses its horizontal hold like an old TV: it shears into diagonal bands that slide sideways and wrap around, separated by a slanted blanking bar that carries the incoming image in, then the shear straightens, wobbles and locks
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform int slips; 
+
+uniform float shear; 
+
+uniform float barWidth; 
+
+uniform vec4 barColor; 
+
+float slipCount() {
+  return max(float(slips), 1.0);
+}
+
+vec4 stream(float x, float y, float unsync) {
+  float period = 1.0 + barWidth;
+  float n = floor(x / period);
+  float xm = x - n * period;
+  vec2 q = vec2(min(xm, 1.0), y);
+  vec4 c = n >= floor(0.5 * slipCount() + 0.5) ? getToColor(q) : getFromColor(q);
+  
+  float d = min(xm, 1.0 - xm);
+  
+  float g = max(1.0 - d / 0.05, 0.0);
+  c.rgb += 0.3 * unsync * g * g * c.a;
+  float soft = min(0.012 * unsync, 0.5 * barWidth) + 1e-5;
+  return mix(barColor, c, clamp(d / soft, 0.0, 1.0));
+}
+
+vec4 transition(vec2 uv) {
+  float period = 1.0 + barWidth;
+  
+  float t = min(progress / 0.88, 1.0);
+  float err = 16.0 * t * t * (1.0 - t) * (1.0 - t);
+  float slip = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+  
+  float u = clamp((progress - 0.74) / 0.26, 0.0, 1.0);
+  float lock = u * (1.0 - u) * (1.0 - u);
+  float tilt = -0.5 * max(shear, 0.5) * lock * sin(9.42478 * u);
+  float unsync = min(err + 3.0 * lock, 1.0);
+  
+  float ripple = 0.012 * sin(uv.y * 9.0 + progress * 40.0) + 0.005 * sin(uv.y * 31.0 - progress * 70.0);
+  float x = uv.x + period * (slipCount() * slip + shear * err * (1.0 - uv.y) + tilt * (1.0 - uv.y)) + err * ripple;
+  
+  float blur = 0.002 * err * slipCount();
+  vec4 c = stream(x, uv.y, unsync);
+  if (blur > 0.0) {
+    for (int i = 0; i < 4; i++) {
+      c += stream(x + blur * (float(i) - 1.5), uv.y, unsync);
+    }
+    c /= 5.0;
+  }
+  
+  c.rgb *= 1.0 - unsync * (0.1 + 0.08 * sin(uv.y * 480.0));
+  return c;
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

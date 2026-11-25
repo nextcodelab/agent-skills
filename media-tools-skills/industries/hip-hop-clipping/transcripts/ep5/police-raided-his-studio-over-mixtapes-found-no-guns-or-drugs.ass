@@ -1,0 +1,66 @@
+﻿[Script Info]
+Title: Local timed speech captions
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Default,Arial,62,&H00FFFFFF,&H0046BEF7,&H002F2114,&H64000000,1,0,0,0,100,100,0,0,1,5,2,2,72,72,510,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.04,0:00:01.86,Default,,0,0,0,,{\fad(70,70)}They knocked down\Nthe door
+Dialogue: 0,0:00:01.86,0:00:04.16,Default,,0,0,0,,{\fad(70,70)}with M16s and\Nhelicopters and
+Dialogue: 0,0:00:04.16,0:00:06.71,Default,,0,0,0,,{\fad(70,70)}guard dogs and\Nall that
+Dialogue: 0,0:00:06.71,0:00:08.08,Default,,0,0,0,,{\fad(70,70)}fly shit.
+Dialogue: 0,0:00:08.08,0:00:09.02,Default,,0,0,0,,{\fad(70,70)}- Why?
+Dialogue: 0,0:00:09.02,0:00:10.77,Default,,0,0,0,,{\fad(70,70)}- I mean,\Nyou know,
+Dialogue: 0,0:00:10.77,0:00:12.00,Default,,0,0,0,,{\fad(70,70)}they thought we\Nwere bootlegging
+Dialogue: 0,0:00:12.00,0:00:12.60,Default,,0,0,0,,{\fad(70,70)}it.
+Dialogue: 0,0:00:12.60,0:00:14.36,Default,,0,0,0,,{\fad(70,70)}Well, they arrested\Nme under
+Dialogue: 0,0:00:14.36,0:00:17.82,Default,,0,0,0,,{\fad(70,70)}the RICO Act\Nfor bootlegging
+Dialogue: 0,0:00:17.82,0:00:20.19,Default,,0,0,0,,{\fad(70,70)}and racketeering, which\Nat the
+Dialogue: 0,0:00:20.19,0:00:21.84,Default,,0,0,0,,{\fad(70,70)}time I had\Nno idea
+Dialogue: 0,0:00:21.84,0:00:22.88,Default,,0,0,0,,{\fad(70,70)}about.
+Dialogue: 0,0:00:22.88,0:00:24.62,Default,,0,0,0,,{\fad(70,70)}Came in guns\Ndrawn, you
+Dialogue: 0,0:00:24.62,0:00:25.28,Default,,0,0,0,,{\fad(70,70)}know.
+Dialogue: 0,0:00:25.28,0:00:27.49,Default,,0,0,0,,{\fad(70,70)}I had a\N{\c&H46BEF7&\b1}studio{\c&HFFFFFF&\b1} full
+Dialogue: 0,0:00:27.49,0:00:29.60,Default,,0,0,0,,{\fad(70,70)}of interns from\Nthe colleges
+Dialogue: 0,0:00:29.60,0:00:31.54,Default,,0,0,0,,{\fad(70,70)}in the area\Nand, you
+Dialogue: 0,0:00:31.54,0:00:32.93,Default,,0,0,0,,{\fad(70,70)}know, threw me\Non the
+Dialogue: 0,0:00:32.93,0:00:34.52,Default,,0,0,0,,{\fad(70,70)}ground, locked me\Nup, took
+Dialogue: 0,0:00:34.52,0:00:36.35,Default,,0,0,0,,{\fad(70,70)}our cars, took\Neverything in
+Dialogue: 0,0:00:36.35,0:00:37.46,Default,,0,0,0,,{\fad(70,70)}the building.
+Dialogue: 0,0:00:37.46,0:00:39.49,Default,,0,0,0,,{\fad(70,70)}And yeah, I\Nmean, when
+Dialogue: 0,0:00:39.49,0:00:40.42,Default,,0,0,0,,{\fad(70,70)}they went in\Nthe news
+Dialogue: 0,0:00:40.42,0:00:41.76,Default,,0,0,0,,{\fad(70,70)}report that night--\N- All
+Dialogue: 0,0:00:41.76,0:00:42.72,Default,,0,0,0,,{\fad(70,70)}for a\Nfucking {\c&H46BEF7&\b1}mixtape.{\c&HFFFFFF&\b1}
+Dialogue: 0,0:00:42.72,0:00:43.72,Default,,0,0,0,,{\fad(70,70)}- All\Nfor mixtapes.
+Dialogue: 0,0:00:43.72,0:00:44.41,Default,,0,0,0,,{\fad(70,70)}When they went\Non a
+Dialogue: 0,0:00:44.41,0:00:45.34,Default,,0,0,0,,{\fad(70,70)}news report that\Nnight, they
+Dialogue: 0,0:00:45.34,0:00:47.12,Default,,0,0,0,,{\fad(70,70)}said normally in\Nthese situations,
+Dialogue: 0,0:00:47.12,0:00:48.64,Default,,0,0,0,,{\fad(70,70)}we find guns\Nand drugs.
+Dialogue: 0,0:00:48.64,0:00:50.18,Default,,0,0,0,,{\fad(70,70)}In this particular\Nsituation, we
+Dialogue: 0,0:00:50.18,0:00:50.78,Default,,0,0,0,,{\fad(70,70)}did not.
+Dialogue: 0,0:00:50.78,0:00:52.01,Default,,0,0,0,,{\fad(70,70)}I mean, literally,\Nthey didn't
+Dialogue: 0,0:00:52.01,0:00:53.37,Default,,0,0,0,,{\fad(70,70)}find a handgun\Nand a
+Dialogue: 0,0:00:53.37,0:00:54.68,Default,,0,0,0,,{\fad(70,70)}roach and\Nno nothing.
+Dialogue: 0,0:00:54.68,0:00:55.43,Default,,0,0,0,,{\fad(70,70)}They got in\Nand come
+Dialogue: 0,0:00:55.43,0:00:56.12,Default,,0,0,0,,{\fad(70,70)}on a\NFriday night.
+Dialogue: 0,0:00:56.12,0:00:57.43,Default,,0,0,0,,{\fad(70,70)}They came on\Na Monday
+Dialogue: 0,0:00:57.43,0:00:58.24,Default,,0,0,0,,{\fad(70,70)}morning.
+Dialogue: 0,0:00:58.24,0:01:00.66,Default,,0,0,0,,{\fad(70,70)}So we got\Noff scot-free
+Dialogue: 0,0:01:00.66,0:01:02.90,Default,,0,0,0,,{\fad(70,70)}with looking clean\Nas a
+Dialogue: 0,0:01:02.90,0:01:03.50,Default,,0,0,0,,{\fad(70,70)}whistle.
+Dialogue: 0,0:01:03.50,0:01:04.65,Default,,0,0,0,,{\fad(70,70)}But yeah, I\Nmean, they
+Dialogue: 0,0:01:04.65,0:01:06.24,Default,,0,0,0,,{\fad(70,70)}confiscated all\Nthe CDs.
+Dialogue: 0,0:01:06.24,0:01:06.99,Default,,0,0,0,,{\fad(70,70)}I mean, we\Nwere on
+Dialogue: 0,0:01:06.99,0:01:08.21,Default,,0,0,0,,{\fad(70,70)}the news that\Nnight, and
+Dialogue: 0,0:01:08.21,0:01:09.77,Default,,0,0,0,,{\fad(70,70)}me and my\Npartner and
+Dialogue: 0,0:01:09.77,0:01:11.73,Default,,0,0,0,,{\fad(70,70)}best friend Don\NCannon, like,
+Dialogue: 0,0:01:11.73,0:01:12.45,Default,,0,0,0,,{\fad(70,70)}you know, in\Nthe blue
+Dialogue: 0,0:01:12.45,0:01:13.40,Default,,0,0,0,,{\fad(70,70)}suits and\Nhandcuffs.
+Dialogue: 0,0:01:13.40,0:01:15.24,Default,,0,0,0,,{\fad(70,70)}It was\Ncrazy.

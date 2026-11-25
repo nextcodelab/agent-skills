@@ -1,0 +1,62 @@
+// WhipPan — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/WhipPan.glsl
+// Author: gre
+// License: MIT
+// Description: A fast camera pan that streaks both images with motion blur, the incoming one arriving from the opposite side
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform vec2 direction; 
+
+uniform float blur; 
+
+const int SAMPLES = 24;
+
+vec4 strip(vec2 q, vec2 d) {
+  vec2 qt = q + d;
+  
+  if (dot(q - 0.5, -d) < 0.5 * dot(d, d)) {
+    return getFromColor(clamp(q, 0.0, 1.0));
+  }
+  return getToColor(clamp(qt, 0.0, 1.0));
+}
+
+float rand(vec2 co) {
+  return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+vec4 transition(vec2 uv) {
+  vec2 d = sign(direction);
+  
+  float p = progress;
+  float h = 1.0 - abs(2.0 * p - 1.0); 
+  
+  float e = 0.5 * h * (0.1 + 0.9 * h * h);
+  float pos = p < 0.5 ? e : 1.0 - e;
+  float len = blur * h * (0.1 + 2.7 * h * h) / 2.8; 
+
+  vec2 q = uv - d * pos;
+  
+  float jitter = rand(uv);
+  vec3 color = vec3(0.0);
+  float alpha = 0.0;
+  for (int i = 0; i < SAMPLES; i++) {
+    float t = (float(i) + jitter) / float(SAMPLES) - 0.5;
+    vec4 c = strip(q + d * t * len, d);
+    color += c.rgb * c.a;
+    alpha += c.a;
+  }
+  return vec4(color / max(alpha, 1e-5), alpha / float(SAMPLES));
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

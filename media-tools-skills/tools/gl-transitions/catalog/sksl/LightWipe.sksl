@@ -1,0 +1,97 @@
+// LightWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/LightWipe.glsl
+// Author: gre
+// License: MIT
+// Description: A band of intense light sweeps across the frame like a glint on glass, blooming the highlights of both images, and leaves the incoming image behind it
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform vec2 direction; 
+
+uniform float width; 
+
+uniform float intensity; 
+
+uniform vec3 color; 
+
+const int TAPS = 12;
+
+vec2 mirror(vec2 v) {
+  return 1.0 - abs(1.0 - mod(v, 2.0));
+}
+
+float ease(float t) {
+  return 0.5 * (t + t * t * (3.0 - 2.0 * t));
+}
+
+vec4 frame(vec2 st, float m) {
+  return mix(getFromColor(st), getToColor(st), m);
+}
+
+vec3 highlight(vec4 c) {
+  float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+  return c.rgb * c.a * smoothstep(0.45, 1.0, lum);
+}
+
+vec4 transition(vec2 uv) {
+  vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);
+  vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
+  
+  float e = 0.5 * (abs(dir.x) * ratio + abs(dir.y));
+  float w = max(width, 0.001);
+  float s = 0.35 * w;
+  
+  float margin = s + 2.0 * w;
+  float pos = -e - margin + 2.0 * (e + margin) * ease(progress);
+  
+  float d = dot(p, dir) - pos;
+  float m = 1.0 - smoothstep(-s, s, d);
+
+  
+  float env = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
+  
+  float core = exp(-d * d / (w * w));
+  float g = (d + 2.2 * w) / (0.3 * w);
+  float glint = 0.45 * exp(-g * g);
+  float halo = 0.35 * exp(-abs(d) / (5.0 * w));
+  float band = (core + glint + halo) * env * intensity;
+  
+  float glow = (core + glint) * env * intensity;
+
+  vec4 c = frame(uv, m);
+
+  
+  vec3 bloom = vec3(0.0);
+  
+  float spread = min(3.0 * w, 0.12);
+  for (int i = 0; i < TAPS; i++) {
+    float t = (float(i) + 0.5) / float(TAPS) * 2.0 - 1.0;
+    vec2 st = mirror((p + dir * (t * spread)) / vec2(ratio, 1.0) + 0.5);
+    
+    float dq = dot((st - 0.5) * vec2(ratio, 1.0), dir) - pos;
+    bloom += (1.0 - abs(t)) * highlight(frame(st, 1.0 - smoothstep(-s, s, dq)));
+  }
+  
+  bloom /= 0.5 * float(TAPS);
+
+  
+  vec3 hue = mix(color, vec3(1.0), core * core);
+  float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+  
+  vec3 light = hue * band * (0.3 + 0.9 * lum) + hue * bloom * glow * 4.0 + hue * core * env * intensity * 1.6;
+  vec3 rgb = 1.0 - (1.0 - c.rgb) * exp(-light);
+  
+  return vec4(rgb, c.a);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

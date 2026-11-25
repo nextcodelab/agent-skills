@@ -1,0 +1,38 @@
+﻿[Script Info]
+Title: Local timed speech captions
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Default,Arial,62,&H00FFFFFF,&H0046BEF7,&H002F2114,&H64000000,1,0,0,0,100,100,0,0,1,5,2,2,72,72,510,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.12,0:00:02.21,Default,,0,0,0,,{\fad(70,70)}When somebody gets\Ninto like
+Dialogue: 0,0:00:02.21,0:00:04.52,Default,,0,0,0,,{\fad(70,70)}a rap {\c&H46BEF7&\b1}beef,{\c&HFFFFFF&\b1}\Nare those
+Dialogue: 0,0:00:04.52,0:00:06.44,Default,,0,0,0,,{\fad(70,70)}intentional?
+Dialogue: 0,0:00:09.28,0:00:10.60,Default,,0,0,0,,{\fad(70,70)}Are those\Nintentional?
+Dialogue: 0,0:00:10.60,0:00:12.46,Default,,0,0,0,,{\fad(70,70)}Like when MGK\Nstarted going
+Dialogue: 0,0:00:12.46,0:00:15.28,Default,,0,0,0,,{\fad(70,70)}after Eminem,
+Dialogue: 0,0:00:15.28,0:00:16.68,Default,,0,0,0,,{\fad(70,70)}MGK chose\NEminem.
+Dialogue: 0,0:00:17.76,0:00:18.36,Default,,0,0,0,,{\fad(70,70)}I've got to\Nthink he
+Dialogue: 0,0:00:18.36,0:00:19.43,Default,,0,0,0,,{\fad(70,70)}thinks that's good\Nfor his
+Dialogue: 0,0:00:19.43,0:00:20.52,Default,,0,0,0,,{\fad(70,70)}record {\c&H46BEF7&\b1}sales.{\c&HFFFFFF&\b1}
+Dialogue: 0,0:00:21.12,0:00:22.97,Default,,0,0,0,,{\fad(70,70)}Yeah, I wouldn't\Ndisagree with
+Dialogue: 0,0:00:22.97,0:00:23.68,Default,,0,0,0,,{\fad(70,70)}you.
+Dialogue: 0,0:00:23.68,0:00:26.35,Default,,0,0,0,,{\fad(70,70)}I don't think\Nhe just
+Dialogue: 0,0:00:26.35,0:00:28.27,Default,,0,0,0,,{\fad(70,70)}shot at him\Nfor no
+Dialogue: 0,0:00:28.27,0:00:31.08,Default,,0,0,0,,{\fad(70,70)}reason or one\Nshoots at
+Dialogue: 0,0:00:31.08,0:00:33.00,Default,,0,0,0,,{\fad(70,70)}an artist for\Nno reason,
+Dialogue: 0,0:00:33.00,0:00:34.62,Default,,0,0,0,,{\fad(70,70)}but there are\Ntimes when
+Dialogue: 0,0:00:34.62,0:00:36.28,Default,,0,0,0,,{\fad(70,70)}people are quite\Naware that
+Dialogue: 0,0:00:37.20,0:00:38.06,Default,,0,0,0,,{\fad(70,70)}rap {\c&H46BEF7&\b1}beef{\c&HFFFFFF&\b1} can\Nbe good
+Dialogue: 0,0:00:38.06,0:00:40.99,Default,,0,0,0,,{\fad(70,70)}for record {\c&H46BEF7&\b1}sales,{\c&HFFFFFF&\b1}\Nlike you
+Dialogue: 0,0:00:40.99,0:00:41.59,Default,,0,0,0,,{\fad(70,70)}said.
+Dialogue: 0,0:00:41.59,0:00:43.16,Default,,0,0,0,,{\fad(70,70)}Not all\Nthe time.
+Dialogue: 0,0:00:43.76,0:00:44.72,Default,,0,0,0,,{\fad(70,70)}Sometimes they just\Ndon't like
+Dialogue: 0,0:00:44.72,0:00:45.48,Default,,0,0,0,,{\fad(70,70)}each other.

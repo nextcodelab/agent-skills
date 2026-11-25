@@ -1,0 +1,103 @@
+// CellDissolve — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/CellDissolve.glsl
+// Author: gre
+// License: MIT
+// Description: Irregular cells, like cracked mud or soap foam, switch to the incoming image one by one, with an optional bright border glowing along the cracks between them
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float cells; 
+
+uniform float smoothness; 
+
+uniform float border; 
+
+uniform vec4 borderColor; 
+
+uniform float seed; 
+
+const float AA = 0.0015;
+
+vec2 hash22(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.xx + p3.yz) * p3.zy);
+}
+
+vec4 transition(vec2 uv) {
+  vec4 a = getFromColor(uv);
+  vec4 b = getToColor(uv);
+  if (progress <= 0.0) return a;
+  if (progress >= 1.0) return b;
+
+  float n = max(cells, 1.0);
+  
+  vec2 p = uv * vec2(ratio, 1.0) * n;
+  vec2 i = floor(p);
+  vec2 f = p - i;
+  vec2 offset = vec2(17.31, 41.97) * seed;
+
+  
+  vec2 mg = vec2(0.0);
+  vec2 mr = vec2(0.0);
+  float md = 8.0;
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 g = vec2(float(x), float(y));
+      vec2 r = g + hash22(i + g + offset) - f;
+      float d = dot(r, r);
+      if (d < md) {
+        md = d;
+        mr = r;
+        mg = g;
+      }
+    }
+  }
+
+  
+  
+  float edge = 8.0;
+  for (int y = -2; y <= 2; y++) {
+    for (int x = -2; x <= 2; x++) {
+      vec2 g = mg + vec2(float(x), float(y));
+      vec2 r = g + hash22(i + g + offset) - f;
+      vec2 dr = r - mr;
+      if (dot(dr, dr) > 0.00001) {
+        edge = min(edge, dot(0.5 * (mr + r), normalize(dr)));
+      }
+    }
+  }
+  
+  edge /= n;
+
+  
+  float h = hash22(i + mg + offset + 97.13).x;
+  float w = clamp(smoothness, 0.0, 1.0);
+  float start = h * (1.0 - w);
+  float m = w > 0.0 ? smoothstep(start, start + w, progress) : step(start, progress);
+
+  
+  vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
+
+  
+  float open = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
+  float bw = max(border, 0.0) * open;
+  if (bw > 0.0) {
+    float l = 1.0 - smoothstep(0.5 * bw - AA, 0.5 * bw + AA, edge);
+    float ba = borderColor.a * l * min(1.0, bw / (2.0 * AA));
+    c = vec4(borderColor.rgb * ba, ba) + c * (1.0 - ba);
+  }
+  return c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

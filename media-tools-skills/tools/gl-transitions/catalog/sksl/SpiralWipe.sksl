@@ -1,0 +1,51 @@
+// SpiralWipe — generated from https://github.com/gl-transitions/gl-transitions/blob/master/transitions/SpiralWipe.glsl
+// Author: gre
+// License: MIT
+// Description: A spiral arm winds out from the center and widens to reveal the incoming image
+
+uniform shader _from;
+uniform shader _to;
+uniform float2 _resolution;
+uniform float progress;
+uniform float ratio;
+
+vec4 getFromColor(vec2 uv) { return vec4(unpremul(_from.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+vec4 getToColor(vec2 uv) { return vec4(unpremul(_to.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }
+
+uniform float turns; 
+
+uniform float smoothness; 
+
+uniform int clockwise; 
+
+float arm (float s, float d) {
+  
+  float end = -0.5 + (turns + 0.5) / 0.6;
+  float tip = mix(-0.5, end, progress);
+  s = max(s, -0.5);
+  float width = sqrt(clamp((tip - s) / max(end - s, 0.001), 0.0, 1.0));
+  
+  float e = smoothness + 0.005 * turns;
+  return smoothstep(0.0, e, width * (0.5 + e) - d);
+}
+
+vec4 transition (vec2 uv) {
+  
+  vec2 q = (uv - 0.5) * vec2(ratio, 1.0) / (0.5 * length(vec2(ratio, 1.0)));
+  
+  float a = dot(q, q) < 1e-12 ? 0.0 : atan(q.x, q.y) / (2.0 * 3.141592653589793);
+  a = fract((clockwise != 0) ? a : -a);
+  
+  float w = length(q) * turns - a;
+  float n = floor(w);
+  float f = w - n;
+  
+  float m = max(arm(n + a, abs(f - 0.5)), max(arm(n + 1.0 + a, 1.5 - f), arm(n - 1.0 + a, f + 0.5)));
+  return mix(getFromColor(uv), getToColor(uv), m);
+}
+
+half4 main(float2 _coord) {
+  vec2 _uv = _coord / _resolution;
+  vec4 _c = clamp(transition(vec2(_uv.x, 1.0 - _uv.y)), 0.0, 1.0);
+  return half4(_c.rgb * _c.a, _c.a);
+}

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "presets": {
+    "scan-slice": {
+      "xfade": "hlslice",
+      "seconds": 0.2,
+      "scan_seconds": 0.32,
+      "scan_color": "0xf63d65",
+      "scan_window": [
+        0.15,
+        0.3,
+        0.7,
+        0.35
+      ]
+    },
+    "iris-open": {
+      "xfade": "circleopen",
+      "seconds": 0.3
+    },
+    "clean-dissolve": {
+      "xfade": "fade",
+      "seconds": 0.25
+    },
+    "side-push": {
+      "xfade": "slideleft",
+      "seconds": 0.24
+    },
+    "vertical-push": {
+      "xfade": "slideup",
+      "seconds": 0.24
+    },
+    "soft-sweep": {
+      "xfade": "smoothleft",
+      "seconds": 0.35
+    },
+    "diagonal-wipe": {
+      "xfade": "diagtl",
+      "seconds": 0.23
+    },
+    "zoom-reveal": {
+      "xfade": "zoomin",
+      "seconds": 0.23
+    },
+    "horizontal-blur-reveal": {
+      "xfade": "hblur",
+      "seconds": 0.20
+    },
+    "blur-zoom-reveal": {
+      "xfade": "hblur",
+      "seconds": 0.20,
+      "incoming_zoom": 1.12,
+      "zoom_settle_seconds": 0.42
+    },
+    "chapter-fade": {
+      "xfade": "fadeblack",
+      "seconds": 0.45
+    }
+  }
+}
