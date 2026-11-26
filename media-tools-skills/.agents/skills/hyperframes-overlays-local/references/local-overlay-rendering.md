@@ -6,6 +6,8 @@ Create a portrait HyperFrames project at the target output resolution. Set `html
 
 For a brief popup, a 3–4 second transparent composition is usually enough. Put the popup entry and optional secondary chip on a visible timeline, then fade/scale them out before the composition ends. Keep the effect’s start offset in the clip plan or effects manifest.
 
+For randomized-looking motion, choose entry, exit, speed, rotation, and safe landing-position options once per clip from a stable seed, then write those choices into the effects manifest. Never use per-frame `Math.random()` or wall-clock timing in a seeked timeline; the same clip must render the same way on every pass.
+
 Render on the machine with the installed CLI, for example:
 
 ```powershell

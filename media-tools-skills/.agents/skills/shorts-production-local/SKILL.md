@@ -14,6 +14,11 @@ Use this skill to turn existing footage into a reviewable batch of short vertica
 - Do not read or display vendor credentials. An agent does not replace an API key; local commands render without one.
 - Keep the original source untouched. Use a new destination and do not overwrite existing exports unless the user explicitly asks.
 
+
+## Style modes
+
+Keep the regular clean-caption and selective-popup treatment as the default. When a user supplies a style reference or asks for varied real-object popups and evidence cutaways, also read `../local-reel-production-system/SKILL.md` and its [object-led split Reel mode](../local-reel-production-system/references/object-led-reel-mode.md). This is an optional visual style for Reels/Shorts; it does not change the requested clip count, language, duration, or delivery format.
+
 ## Workflow
 
 1. Inspect the source’s duration, frame size, frame rate, audio tracks, and available transcripts. Prefer a transcript already in the project; use local ASR only when installed and needed.
@@ -28,3 +33,6 @@ Use this skill to turn existing footage into a reviewable batch of short vertica
 For the detailed edit and output checks, read [production workflow](references/production-workflow.md). For HyperFrames overlays, use `hyperframes-overlays-local`.
 
 For podcasts, also use `podcast-hooks-local`. Put a readable editorial hook on frame zero, inspect its placement with dialogue captions, and create a matching thumbnail when requested. Record the actual opening text in the delivery manifest.
+
+
+

@@ -16,12 +16,14 @@ Create a separate animated overlay for each selected clip, then composite it ove
 
 ## Effect design
 
-1. Read the clip plan and transcript around each effect. Give each clip one or two brief visual beats that fit a real moment, such as a challenge counter, budget tag, cooking badge, timer, or celebratory reveal.
+1. Read the clip plan and transcript around each effect. For a conventional effects pass, choose one or two brief beats. For the optional object-led split Reel mode, use several selected story beats across the clip, not a popup on every noun; see `../local-reel-production-system/references/object-led-reel-mode.md`.
 2. Keep humor friendly. Do not mock the person, use humiliating memes, or turn serious or emotional moments into a joke. For a personal or emotional moment, use a simple supportive motif or skip the effect.
 3. Place graphics near an open edge of the frame, away from faces, gestures, existing captions, and platform controls. Keep the base footage readable.
-4. Use a short pop-in, bounce, hold, and fade/scale-out. Vary the color and sticker to fit the context without repeating one large card in every clip.
-5. Render transparent WebM locally from a HyperFrames composition with a transparent root and deterministic, seekable GSAP animation. Use a bundled local GSAP file rather than a CDN. Run `npx hyperframes lint`; fix errors. Local-font warnings are acceptable only when the render is local and the font exists on this machine.
+4. Vary popup choreography across selected beats: mix rotate-and-scale entrances, fast slides, soft fades, short arcs, and slower drifts; vary direction, speed, landing lane, hold, and exit (including fade-plus-rotation). Inspect each shot and use an open safe position, avoiding faces, demonstrated hands, dialogue captions, and platform controls. Do not repeat an identical motion/position pair on adjacent beats. If using random variation, choose from safe authored options with a stable clip seed, record the choices, and keep the seeked GSAP timeline deterministic.
+5. Render transparent WebM locally from a HyperFrames composition with a transparent root and deterministic, seekable GSAP animation. Use a bundled local GSAP file rather than a CDN. Run the installed local HyperFrames lint command through `tools/hyperframes/hyperframes-local.cmd`; fix errors. Local-font warnings are acceptable only when the render is local and the font exists on this machine.
 6. Composite the transparent WebM over its matching clip at the planned timestamp. Preserve the original clip duration and audio. Write the exact effect time and output path in `effects_manifest.csv`.
 7. Review a contact sheet sampled while each sticker is visible. Check alpha, text legibility, safe positioning, context match, and that no sticker covers a face or the underlying caption.
 
 For the transparent WebM and FFmpeg details, read [local overlay rendering](references/local-overlay-rendering.md).
+
+
