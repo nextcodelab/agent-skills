@@ -1,0 +1,129 @@
+{
+  "id": "onchain-transparent-finance-stickers",
+  "origin": "Original procedural illustrations created locally for the project",
+  "external_assets": [],
+  "editable_source": "draw_stickers.py",
+  "intended_use": "Contextual illustrations. They do not represent real brands, price series, or market data.",
+  "files": [
+    {
+      "file": "institution.png",
+      "tags": [
+        "wall street",
+        "bank",
+        "institution",
+        "traditional finance"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "calendar.png",
+      "tags": [
+        "market hours",
+        "weekend",
+        "round the clock",
+        "24/7"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "token.png",
+      "tags": [
+        "tokenization",
+        "blockchain",
+        "token",
+        "asset"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "rail.png",
+      "tags": [
+        "rails",
+        "technology",
+        "settlement",
+        "infrastructure"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "globe.png",
+      "tags": [
+        "global",
+        "international",
+        "cross-border",
+        "border"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "exchange.png",
+      "tags": [
+        "exchange",
+        "trading",
+        "transfer",
+        "two-sided market"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "people.png",
+      "tags": [
+        "investors",
+        "people",
+        "clients",
+        "access"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "liquidity.png",
+      "tags": [
+        "liquidity",
+        "capital flows",
+        "funding",
+        "money"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "rules.png",
+      "tags": [
+        "regulation",
+        "guardrails",
+        "trust",
+        "oversight"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "clock.png",
+      "tags": [
+        "speed",
+        "real time",
+        "waiting",
+        "settlement"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "structure.png",
+      "tags": [
+        "market structure",
+        "network",
+        "intermediaries",
+        "systems"
+      ],
+      "background": "transparent"
+    },
+    {
+      "file": "chart.png",
+      "tags": [
+        "markets",
+        "investing",
+        "trading",
+        "volatility"
+      ],
+      "background": "transparent"
+    }
+  ]
+}

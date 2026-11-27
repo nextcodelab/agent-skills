@@ -19,6 +19,8 @@ Use this skill to turn existing footage into a reviewable batch of short vertica
 
 Keep the regular clean-caption and selective-popup treatment as the default. When a user supplies a style reference or asks for varied real-object popups and evidence cutaways, also read `../local-reel-production-system/SKILL.md` and its [object-led split Reel mode](../local-reel-production-system/references/object-led-reel-mode.md). This is an optional visual style for Reels/Shorts; it does not change the requested clip count, language, duration, or delivery format.
 
+For clean podcast briefs such as Onchain Capital, keep the interview as the main picture. Use large captions over footage with a restrained outline or shadow. Leave the area behind the captions clear. Use transparent cutouts or illustrations only when they clarify a spoken beat. Keep them outside the face and caption areas, and let some clips stay plain. Use a solid panel when the visual needs one for legibility or the brief calls for it. Use a gentle punch-in with the opening hook and an occasional pullback or reframe when it supports the dialogue.
+
 ## Workflow
 
 1. Inspect the source’s duration, frame size, frame rate, audio tracks, and available transcripts. Prefer a transcript already in the project; use local ASR only when installed and needed.
@@ -33,6 +35,14 @@ Keep the regular clean-caption and selective-popup treatment as the default. Whe
 For the detailed edit and output checks, read [production workflow](references/production-workflow.md). For HyperFrames overlays, use `hyperframes-overlays-local`.
 
 For podcasts, also use `podcast-hooks-local`. Put a readable editorial hook on frame zero, inspect its placement with dialogue captions, and create a matching thumbnail when requested. Record the actual opening text in the delivery manifest.
+
+For capped podcast batches, check these against the brief before delivery:
+
+- Inspect frame zero at phone size. Keep the hook within safe margins and confirm the spoken opener lands in the first three seconds. Check that the hook and captions stay clear of the face and each other.
+- Treat “under 30 seconds” as a strict cap. Trim to a complete spoken beat with room for frame and audio rounding, then verify the final container duration with ffprobe.
+- When the brief requires 75% visible podcast footage, total the time when cutaways replace the interview and keep that at 25% or less. Count cutaways baked into the source too. Verify the planned coverage in the export.
+- Run `python tools/agent-edit/shorts_audit.py <folder> --count 20 --under 30` to check the expected count, 1080×1920 format, codecs and container runtime. Change the count and cap to match the brief. Review the picture and captions separately.
+- For financial topics, use the original transparent finance illustrations under `assets/stickers/png/finance-micro/` when they clarify a line.
 
 
 
